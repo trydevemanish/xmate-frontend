@@ -5,7 +5,12 @@ module.exports = {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        manrope: ["Manrope", 'sans-serif'],
+        yatraone: ["Yatra One", 'system-ui'],
+      },
+    },
   },
   plugins: [],
 };
