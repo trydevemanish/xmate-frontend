@@ -8,7 +8,7 @@ export default function Navbar() {
         <img src={Icon} alt="logo" className='size-6' />
         <p className='text-2xl font-yatraone text-violet-600 font-bold'>xMate</p>
       </div>
-      <div className='flex items-center text-xs gap-8'>
+      <div className='flex items-center text-sm gap-8'>
         <p>About</p>
         <p>Login</p>
         <button className='px-4 py-1 bg-violet-600 text-white rounded shadow-violet-200 shadow-md hover:bg-violet-500'>dashboard</button>
