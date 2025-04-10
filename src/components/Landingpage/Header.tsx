@@ -4,8 +4,8 @@ import HeaderImg2 from '../../assets/headerimg2.webp'
 
 export default function Header() {
   return (
-    <div className="py-16 px-16 bg-gradient-to-b from-white via-violet-200 to-white">
-        <p className="text-5xl font-yatraone text-center">
+    <div className="py-4 px-16 bg-gradient-to-b from-white via-violet-200 to-white">
+        <p className="text-5xl font-yatraone text-center pt-16">
             Challenge, 
             <span className="text-violet-500">Compete</span>
             , Conquer -
@@ -33,7 +33,7 @@ export default function Header() {
             </div>
             <div className="col-start-3 col-end-4">
                 <p className="text-xs font-bold font-manrope py-1"> – Who’s the Ultimate Chess Champion?</p>
-                <img src={HeaderImg2} alt="headerImage2" className="w-full min-w-80 max-w-[30rem] min-h-72 h-auto max-h-[20rem] brightness-125 rounded shadow-lg shadow-violet-100" />
+                <img src={HeaderImg2} alt="headerImage2" className="w-full min-w-80 max-w-[30rem] min-h-72 h-auto max-h-[20rem] brightness-80 rounded shadow-lg shadow-violet-100" />
             </div>
         </div>
     </div>
