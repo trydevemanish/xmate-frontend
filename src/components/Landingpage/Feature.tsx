@@ -24,7 +24,7 @@ const features = [
 
 export default function Feature() {
   return (
-    <div className="py-16 px-28 bg-gradient-to-b from-white to-violet-100">
+    <div className="py-12 px-28">
         <div className="flex flex-col gap-5 justify-center items-center pt-16">
             <p className="text-center border px-8 py-1 inline-block bg-violet-500 text-sm text-white rounded font-manrope shadow-xl animate-bounce shadow-violet-200 hover:bg-violet-400">Create your first game.</p>
             <p className="text-3xl font-bold py-8 font-cabinsketch flex gap-2">
