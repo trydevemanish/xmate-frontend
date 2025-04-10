@@ -9,6 +9,7 @@ module.exports = {
       fontFamily: {
         manrope: ["Manrope", 'sans-serif'],
         yatraone: ["Yatra One", 'system-ui'],
+        cabinsketch : [ "Cabin Sketch", 'sans-serif']
       },
     },
   },

@@ -1,9 +1,12 @@
 import './App.css'
+import Header from './components/Landingpage/Header'
+import Navbar from './components/Landingpage/Navbar'
 
 function App() {
   return (
    <main>
-     <p className='text-center'>Started working on xmate</p>
+    <Navbar />
+    <Header />
    </main>
   )
 }
