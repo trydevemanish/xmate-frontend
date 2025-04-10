@@ -10,7 +10,7 @@ export default function Info() {
             </div>
             <div className='col-start-2 col-end-3 flex flex-col'>
                 <p className='font-yatraone text-white text-2xl'>Challenge Your Friends to a Game of Chess – Anytime, Anywhere!</p>
-                <p className='font-manrope font-semibold leading-6 text-xs'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Optio, possimus? Facere architecto nobis, rerum accusantium libero quas vero recusandae sapiente suscipit quidem ea delectus, laboriosam fuga provident laudantium eveniet molestiae?</p>
+                <p className='font-manrope font-semibold leading-6 text-xs'>Welcome to ChessMate , a fun and interactive online chess platform built for everyone – from coding enthusiasts and students to professional players! With ChessMate, you can challenge your friends or peers to thrilling chess matches, track your progress, and climb the leaderboard to prove your skills. </p>
                 <div className='flex items-end justify-between'>
                     <button className='bg-violet-600 text-white py-2 px-16 rounded shadow-md shadow-violet-300 hover:bg-violet-500 '>Create your first match.</button>
                     <img src={smallImage} alt="secondImage" className='min-w-28 w-32 max-w-96 rounded-md shadow-md shadow-violet-300' />

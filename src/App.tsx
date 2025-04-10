@@ -18,7 +18,7 @@ function App() {
     <Scrollbar />
     <Info />
     {/* <Faq /> */}
-    {/* <Footer /> */}
+    <Footer />
    </main>
   )
 }
