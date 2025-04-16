@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import Icon from '../../assets/chessicon.png'
 
 export default function Navbar() {
@@ -11,7 +12,9 @@ export default function Navbar() {
       <div className='flex items-center text-sm gap-8'>
         <p>About</p>
         <p>Login</p>
-        <button className='px-4 py-1 bg-violet-600 text-white rounded shadow-violet-200 shadow-md hover:bg-violet-500'>dashboard</button>
+        <button className='px-4 py-1 bg-violet-600 text-white rounded shadow-violet-200 shadow-md hover:bg-violet-500'>
+          <Link to={'/dashboard'} >dashboard</Link>
+        </button>
       </div>
     </div>
    </div>
