@@ -5,6 +5,8 @@ import { Route,Routes } from 'react-router'
 import Register from './Pages/Auth/Register'
 import Dashboard from './Pages/Dashboard'
 import Profile from './components/Profile'
+import Challenge from './Pages/Challenge'
+
 
 function App() {
   return (
@@ -15,6 +17,7 @@ function App() {
       <Route path='/register' element={<Register />} />
       <Route path='/dashboard' element={<Dashboard />} />
       <Route path='/u/profile' element={<Profile />} />
+      <Route path='/challenge/u/:gameid' element={<Challenge />} />
     </Routes>
    </main>
   )

@@ -6,7 +6,7 @@ export default function Welcometoxmate({setClickedMenu}:{setClickedMenu : React.
       <div className='col-start-1 col-end-2'>
         <img src={WelcomImage} alt="welcomimage" className='min-w-full max-h-screen object-cover' />
       </div>
-      <div className='col-start-2 col-end-3 bg-gradient-to-b from-white via-violet-200 to-white flex flex-col gap-3 justify-center items-center'>
+      <div className='col-start-2 col-end-3 bg-gradient-to-b from-white via-violet-200 to-white flex flex-col gap-6 justify-center items-center'>
         <p className='text-center text-xl font-manrope'>
           <span>Welcome to</span>
           <span className='font-bold text-violet-500'> xMate!</span>
