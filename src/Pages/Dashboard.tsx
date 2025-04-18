@@ -11,8 +11,8 @@ export default function Dashboard() {
         <div className="col-start-1 col-end-3 border-r border-black pr-1">
             <Sidebar setClickedMenu={setClickedMenu} />
         </div>
-        <div className="col-start-3 col-end-13 pl-2">
-            {clickedMenu == "" && <Welcometoxmate />}
+        <div className="col-start-3 col-end-13">
+            {clickedMenu == "" && <Welcometoxmate setClickedMenu={setClickedMenu} />}
             {clickedMenu == 'leaderboard' && <LeaderBoard />}
             {clickedMenu == 'create your own game' && <Creategame />}
         </div>

@@ -1,5 +1,6 @@
 import React,{useState} from 'react'
 import { Link } from 'react-router'
+import { BiUserCircle } from 'react-icons/bi'
 
 const Sidebarmenuoptions = [
   {
@@ -39,7 +40,10 @@ export default function Sidebar({setClickedMenu}:{setClickedMenu : React.Dispatc
           ))}
         </div>
         <div className='flex flex-col gap-2 '>
-        <Link to={'/u/profile'}><p className='text-center outline-violet-500 py-2 text-xs outline rounded cursor-pointer w-full font-bold font-manrope hover:bg-violet-400 hover:text-white hover:outline-none'>Profile</p></Link>
+        <Link to={'/u/profile'}><p className='text-center outline-violet-500 py-2 text-xs outline rounded cursor-pointer w-full font-bold font-manrope hover:bg-violet-400 hover:text-white hover:outline-none flex gap-1 justify-center items-center'>
+          <span><BiUserCircle className='size-5 text-violet-500 ' /></span>
+          <span>Profile</span>
+        </p></Link>
          <p className='text-center bg-violet-500 text-white shadow-lg shadow-violet-300 rounded-md py-2 w-full text-xs cursor-pointer font-bold font-manrope'>logout</p>
         </div>
       </div>
