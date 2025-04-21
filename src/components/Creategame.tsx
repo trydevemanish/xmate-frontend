@@ -2,10 +2,28 @@ import { useState } from "react"
 import { BiLoader } from "react-icons/bi"
 import { BiShareAlt } from "react-icons/bi"
 import { BiCopyAlt } from "react-icons/bi"
+import { FaChessBoard } from "react-icons/fa6"
+import Chessdesign1 from '../assets/chessdesign1.png'
+import Chessdesign2 from '../assets/chessdesign2.png'
+
+const chessDesign = [
+  {
+    id :1,
+    alt:'design1',
+    chessdesign : Chessdesign1
+  },
+  {
+    id:2,
+    alt:'design2',
+    chessdesign : Chessdesign2
+  },
+]
 
 export default function Creategame() {
   const [loadingState,setLoadingState] = useState(false)
   const [gameCreated,setGameCreated] = useState(false)
+  const [clickedImageId, setClickedImageId] = useState(0);
+
 
   async function handleCreateMatch() {
     try {
@@ -23,6 +41,23 @@ export default function Creategame() {
 
   return (
     <div className="flex flex-col gap-2 justify-center items-center min-h-screen">
+      <p className="flex items-center gap-1">
+        <span><FaChessBoard className="size-5 text-violet-400" /></span>
+        <span>Choose the chessBoard design.</span>
+      </p>
+      <div className="flex items-center gap-4 py-6">
+        {chessDesign.map((data) => (
+          <img
+            src={data?.chessdesign}
+            alt={data?.alt}
+            key={data?.id} 
+            className={`size-20 shadow shadow-violet-300 cursor-pointer ${clickedImageId === data?.id ? 'border-black border-2 rounded' : ''}`}
+            onClick={() => {
+              setClickedImageId(data?.id);
+            }}
+          />
+        ))}
+      </div>
       <p className="text-base">
         <span className="opacity-70">Challenge your </span>
         <span className="font-bold font-yatraone">peers</span>

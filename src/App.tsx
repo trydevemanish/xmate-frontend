@@ -6,6 +6,7 @@ import Register from './Pages/Auth/Register'
 import Dashboard from './Pages/Dashboard'
 import Profile from './components/Profile'
 import Challenge from './Pages/Challenge'
+import { ToastContainer } from 'react-toastify';
 
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
       <Route path='/u/profile' element={<Profile />} />
       <Route path='/challenge/u/:gameid' element={<Challenge />} />
     </Routes>
+    <ToastContainer />
    </main>
   )
 }

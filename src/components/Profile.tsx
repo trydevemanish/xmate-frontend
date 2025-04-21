@@ -55,7 +55,7 @@ type userfieldOptionsType = {
 
 export default function Profile() {
   return (
-    <div className="px-52 min-h-screen bg-gradient-to-b from-white via-violet-100 to-white">
+    <div className="px-52 min-h-screen bg-gradient-to-b from-white via-violet-200 to-white">
       <img src={profileheader} alt="profile image" className='w-full relative object-cover max-h-40 ' />
       <div>
         <img src={profile} alt="profile" className='size-24 object-cover absolute top-28 rounded-full shadow shadow-violet-200 border left-[220px]'/>
