@@ -1,89 +1,163 @@
-import { useParams } from 'react-router'
 import { Chessboard } from "react-chessboard";
 import { useState } from "react";
-import { Chess } from 'chess.js';
-import { toast } from 'react-toastify';
-import { Piece, Square } from 'react-chessboard/dist/chessboard/types';
+import { Chess, Move } from 'chess.js';
+import { CustomSquareStyles, Square } from 'react-chessboard/dist/chessboard/types';
+
+type SquareStyles = {
+  [key in Square]?: React.CSSProperties;
+};
 
 export default function Challenge() {
-  const chess = new Chess()
-  const [game, setGame] = useState(chess);
-  let params = useParams()
-  let gameid = params.gameid;
+  const [game, setGame] = useState(new Chess());
+  const [moveFrom, setMoveFrom] = useState<Square | "">("");
+  const [moveTo, setMoveTo] = useState<Square | null>(null);
+  const [showPromotionDialog, setShowPromotionDialog] = useState(false);
+  const [rightClickedSquares, setRightClickedSquares] = useState({} as CustomSquareStyles);
+  const [moveSquares, setMoveSquares] = useState({});
+  const [optionSquares, setOptionSquares] = useState({});
 
-  function safeGameMutate(modify : any) {
-    setGame((g : any) => {
-      const update = {
-        ...g
-      };
-      modify(update);
-      return update;
+  function getMoveOptions(square : Square) {
+    const moves = game.moves({
+      square,
+      verbose: true
     });
-  }
 
-  function onDragStart(piece:any){
-    if (game.isGameOver()) return toast.error('game ended')
-
-    if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
-        (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
-      return false
+    if (moves.length === 0) {
+      setOptionSquares({});
+      return false;
     }
-  }
 
-  function onDrop(sourceSquare:Square,targetSquare:Square,piece:Piece){
-    const move = game.move({
-      from: sourceSquare,
-      to: targetSquare,
-      promotion: 'q'
+    const newSquares : SquareStyles = {};
+
+    moves.map((move:Move) => {
+
+      const pieceAtTo = game.get(move.to);
+      const pieceAtFrom = game.get(square);
+
+      newSquares[move.to] = {
+        background: pieceAtTo && pieceAtFrom && pieceAtTo.color !== pieceAtFrom.color ? "radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)" : "radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)",
+        borderRadius: "50%"
+      }
+
+      return move;
     })
 
-    if (move === null) {
-      toast.error('invalid move')
+    newSquares[square] = {
+      background: "rgba(255, 255, 0, 0.4)"
+    };
 
-      return false
-    }
-    updateStatus()
+    setOptionSquares(newSquares);
     return true;
+    
   }
 
-  function updateStatus(){
-      let status = ''
+  function onSquareClick(square:Square) {
+    setRightClickedSquares({});
 
-      let moveColor = 'White'
-
-      if (game.turn() === 'b') {
-        moveColor = 'Black'
-      }
-
-      else if (game.isCheckmate()) {
-        status = 'Game over, ' + moveColor + ' is in checkmate.'
-      }
-
-      else if (game.isDraw()) {
-        status = 'Game over, drawn position'
-      }
-
-      else {
-        status = moveColor + ' to move'
-
-        if (game.inCheck()) {
-          status += ', ' + moveColor + ' is in check'
-          toast.info(`${moveColor} is in check`)
-        }
+    if (!moveFrom) {
+      const hasMoveOptions = getMoveOptions(square);
+      if (hasMoveOptions) setMoveFrom(square);
+      return;
     }
+
+    if (!moveTo) {
+      const moves = game.moves({
+        square:moveFrom as Square,
+        verbose: true
+      });
+
+      const foundMove = moves.find((m:any) => m.from === moveFrom && m.to === square);
+
+      if (!foundMove) {
+        const hasMoveOptions = getMoveOptions(square);
+        setMoveFrom(hasMoveOptions ? square : "");
+        return;
+      }
+
+      setMoveTo(square);
+
+      if (foundMove.color === "w" && foundMove.piece === "p" && square[1] === "8" || foundMove.color === "b" && foundMove.piece === "p" && square[1] === "1") {
+        setShowPromotionDialog(true);
+        return;
+      }
+
+      const gameCopy = new Chess(game.fen());
+
+
+      const move = gameCopy.move({
+        from: moveFrom,
+        to: square,
+        promotion: "q"
+      });
+
+      if (move === null) {
+        const hasMoveOptions = getMoveOptions(square);
+        if (hasMoveOptions) setMoveFrom(square);
+        return;
+      }
+
+      setGame(gameCopy);
+      setMoveFrom("");
+      setMoveTo(null);
+      setOptionSquares({});
+      return;
+    }
+  }
+
+  function onPromotionPieceSelect(piece:any) {
+      if (piece) {
+        const gameCopy : any = {
+          ...game
+        };
+
+        gameCopy.move({
+          from: moveFrom,
+          to: moveTo,
+          promotion: piece[1].toLowerCase() ?? "q"
+        });
+
+        setGame(gameCopy);
+      }
+      setMoveFrom("");
+      setMoveTo(null);
+      setShowPromotionDialog(false);
+      setOptionSquares({});
+
+      return true;
+  }
+
+  function onSquareRightClick(square : Square) {
+    const colour = "rgba(0, 0, 255, 0.4)";
+    setRightClickedSquares({
+      ...rightClickedSquares,
+      [square]: rightClickedSquares[square] && rightClickedSquares[square].backgroundColor === colour ? undefined : {
+        backgroundColor: colour
+      }
+    })
   }
 
   return (
-    <div>
-      <Chessboard 
-        id="BasicBoard"
-        position={game.fen()} 
-        onPieceDrop={onDrop}
-        boardWidth={500}
-      />
-    </div>
+      <div style={{width:'500px'}}>
+        <Chessboard 
+            id="ClickToMove" 
+            animationDuration={200} 
+            arePiecesDraggable={false} 
+            position={game.fen()} 
+            onSquareClick={onSquareClick} 
+            onSquareRightClick={onSquareRightClick} 
+            onPromotionPieceSelect={onPromotionPieceSelect} 
+            customBoardStyle={{
+              borderRadius: "4px",
+              boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)"
+            }} 
+            customSquareStyles={{
+              ...moveSquares,
+              ...optionSquares,
+              ...rightClickedSquares
+            }} 
+            promotionToSquare={moveTo} 
+            showPromotionDialog={showPromotionDialog}
+        />
+      </div>
   )
 }
-
-
-

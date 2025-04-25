@@ -19,7 +19,8 @@ function App() {
       <Route path='/dashboard' element={<Dashboard />} />
       <Route path='/u/profile' element={<Profile />} />
       <Route path='/challenge/u/:gameid' element={<Challenge />} />
-    </Routes>
+      {/* <Route path='/random/u/:gameid' element={<RandonGame />} /> */}
+      </Routes>
     <ToastContainer />
    </main>
   )
