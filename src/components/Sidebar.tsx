@@ -7,8 +7,11 @@ const Sidebarmenuoptions = [
     menu : 'leaderboard'
   },
   {
-    menu : 'create your own game'
-  }
+    menu : 'play with computer'
+  },
+  {
+    menu : 'create your own match'
+  },
 ]
 
 type Sidebarmenuoptiontype = {
