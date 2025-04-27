@@ -2,6 +2,8 @@ import { Chessboard } from "react-chessboard";
 import { useState } from "react";
 import { Chess, Move } from 'chess.js';
 import { CustomSquareStyles, Square } from 'react-chessboard/dist/chessboard/types';
+import { toast } from "react-toastify";
+import Challengeotherpart from "../components/Challengeotherpart";
 
 type SquareStyles = {
   [key in Square]?: React.CSSProperties;
@@ -13,7 +15,7 @@ export default function Challenge() {
   const [moveTo, setMoveTo] = useState<Square | null>(null);
   const [showPromotionDialog, setShowPromotionDialog] = useState(false);
   const [rightClickedSquares, setRightClickedSquares] = useState({} as CustomSquareStyles);
-  const [moveSquares, setMoveSquares] = useState({});
+  const [moveSquares] = useState({});
   const [optionSquares, setOptionSquares] = useState({});
 
   function getMoveOptions(square : Square) {
@@ -25,6 +27,27 @@ export default function Challenge() {
     if (moves.length === 0) {
       setOptionSquares({});
       return false;
+    }
+
+    if(game.isStalemate()){
+      toast.info('Choose diffrenet move.')
+    }
+
+    if(game.isGameOver()){
+      toast.info('Game over')
+    }
+
+    if(game.isDraw()){
+      toast.info('Game draw')
+    }
+
+    if(game.inCheck()){
+      toast.info('In check')
+    }
+
+    if(game.isCheckmate()){
+      toast.info('Checkmate')
+      return;
     }
 
     const newSquares : SquareStyles = {};
@@ -137,27 +160,35 @@ export default function Challenge() {
   }
 
   return (
-      <div style={{width:'500px'}}>
-        <Chessboard 
-            id="ClickToMove" 
-            animationDuration={200} 
-            arePiecesDraggable={false} 
-            position={game.fen()} 
-            onSquareClick={onSquareClick} 
-            onSquareRightClick={onSquareRightClick} 
-            onPromotionPieceSelect={onPromotionPieceSelect} 
-            customBoardStyle={{
-              borderRadius: "4px",
-              boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)"
-            }} 
-            customSquareStyles={{
-              ...moveSquares,
-              ...optionSquares,
-              ...rightClickedSquares
-            }} 
-            promotionToSquare={moveTo} 
-            showPromotionDialog={showPromotionDialog}
-        />
+      <div className="grid grid-cols-2 min-h-screen">
+        <div className="col-start-1 col-end-2">
+          <div className="z-50 flex items-center min-h-screen px-6">
+              <Chessboard 
+                id="ClickToMove" 
+                animationDuration={200} 
+                arePiecesDraggable={false} 
+                position={game.fen()} 
+                onSquareClick={onSquareClick} 
+                onSquareRightClick={onSquareRightClick} 
+                onPromotionPieceSelect={onPromotionPieceSelect} 
+                boardWidth={500}
+                customBoardStyle={{
+                  borderRadius: "4px",
+                  boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)"
+                }} 
+                customSquareStyles={{
+                  ...moveSquares,
+                  ...optionSquares,
+                  ...rightClickedSquares
+                }} 
+                promotionToSquare={moveTo} 
+                showPromotionDialog={showPromotionDialog}
+              />
+          </div>
+        </div>
+        <div className="col-start-2 col-end-3">
+          <Challengeotherpart />
+        </div>
       </div>
   )
 }
