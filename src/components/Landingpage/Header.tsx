@@ -9,7 +9,7 @@ export default function Header() {
             Challenge, 
             <span className="text-violet-500">Compete</span>
             , Conquer -
-            </p>
+        </p>
         <p className="font-cabinsketch py-3 text-3xl flex gap-1 pl-[35rem] items-center"> 
             <span>Play Chess with </span>
             <span className="text-violet-500 font-bold"> Friends !</span>

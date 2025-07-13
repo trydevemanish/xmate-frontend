@@ -6,6 +6,7 @@ import Header from '../components/Landingpage/Header'
 import Info from '../components/Landingpage/Info'
 import Navbar from '../components/Landingpage/Navbar'
 import Scrollbar from '../components/Landingpage/Scrollbar'
+import Faqtop from '../components/Landingpage/Faqtop'
 
 export default function Home() {
   return (
@@ -17,6 +18,7 @@ export default function Home() {
         <Scrollbar />
         <Info />
         <Faq />
+        <Faqtop />
         <Footer />
     </div>
   )

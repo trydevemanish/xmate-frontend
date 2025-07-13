@@ -1,7 +1,28 @@
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import Icon from '../../assets/chessicon.png'
 
+const menuitem = [
+  {
+    name : 'About'
+  },
+  {
+    name : 'Login'
+  }
+]
+
+type menuitem = {
+  name : string
+}
+
 export default function Navbar() {
+  const navigate = useNavigate()
+
+  function handleMenuRouting(menu:string){
+    if(menu == 'Login'){
+      navigate('/login')
+    }
+  }
+
   return (
    <div className='px-16 py-2'>
     <div className='flex justify-between item-center'>
@@ -10,8 +31,13 @@ export default function Navbar() {
         <p className='text-2xl font-yatraone text-violet-600 font-bold'>xMate</p>
       </div>
       <div className='flex items-center text-sm gap-8'>
-        <p>About</p>
-        <p>Login</p>
+        {
+          menuitem.map((item:menuitem,idx:number) => (
+            <p key={idx} className='cursor-pointer' onClick={() => handleMenuRouting(item.name)}>
+              {item.name}
+            </p>
+          ))
+        }
         <button className='px-4 py-1 bg-violet-600 text-white rounded shadow-violet-200 shadow-md hover:bg-violet-500'>
           <Link to={'/dashboard'} >dashboard</Link>
         </button>
