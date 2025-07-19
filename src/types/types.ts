@@ -4,7 +4,7 @@ export type SigninFormValues = {
 };
 
 export type SignupFormValues = {
-    fullname:string;
+    username:string;
     email: string;
     password: string;
 };

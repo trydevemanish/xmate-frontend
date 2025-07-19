@@ -2,14 +2,32 @@ import { useForm } from "react-hook-form"
 import { SigninFormValues } from "../../types/types"
 import { GiChessBishop } from "react-icons/gi"
 import { Link } from "react-router"
+import { useEffect, useState } from "react"
+import { useAuth } from '../../context/useContext.tsx'
+import { useNavigate } from "react-router";
 
 export default function Login() {
-    const { register,setValue , handleSubmit, formState: { errors },} = useForm<SigninFormValues>()
+    const { register , handleSubmit} = useForm<SigninFormValues>()
+    const [loading,setloading] = useState(false)
+    const { isLoggedIn,loginUser } = useAuth()
+    const navigate = useNavigate()
 
-    const onSubmit = handleSubmit((data : SigninFormValues) => {
-        console.log(data)
-        setValue("email",'')
-        setValue("password",'')
+    useEffect(() => {
+        if(isLoggedIn){
+            navigate('/dashboard')
+        }
+    },[])
+
+    const onSubmit = handleSubmit(async(data : SigninFormValues) => {
+        try {
+            setloading(true)
+            loginUser(data)
+        } catch (error:any) {
+            console.error(`Issue faced while user login: ${error.message}`)
+            throw new Error(`Issue faced while user login: ${error.message}`)
+        } finally {
+            setloading(false)
+        }
     })
 
   return (
@@ -30,7 +48,16 @@ export default function Login() {
                 <input {...register("password")} type="password" className="min-w-72 py-[5px] text-sm border border-black rounded focus:outline-none px-2" />
             </div>
             <div className="py-8">
-                <button type="submit" className="w-full py-1 bg-violet-600 text-white rounded shadow-md shadow-violet-400 ">Login</button>
+                <button type="submit" className="w-full py-1 bg-violet-600 text-white rounded shadow-md shadow-violet-400 ">
+                    {
+                        loading ? 
+                        (
+                          <p>Wait logining <span className="animate-bounce duration-300 transition-all">...</span></p>  
+                        ) 
+                        :
+                        'login'
+                    }
+                </button>
                 <p className="text-sm text-center py-4">New to xMate? <Link to={'/register'} className="text-blue-600" >Register</Link></p>
             </div>
         </form>
