@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router"
 import { useAuth } from "../../context/useContext"
 import { toast } from "react-toastify"
 import { useState } from "react"
+import { useDataStore } from "../../zustand/usedatastore"
 
 export default function Register() {
     const { register, handleSubmit} = useForm<SignupFormValues>()
@@ -14,7 +15,6 @@ export default function Register() {
     const [loading,setloading] = useState(false)
     if(!token || token == null){
         console.log('Token value is null')
-        return;
     }
 
     const onSubmit = handleSubmit(async(data : SignupFormValues) => {
@@ -41,6 +41,8 @@ export default function Register() {
             if(registerUserData){console.error(await res.text())}
     
             toast.success(await registerUserData?.message)
+            //setting the user data in the store
+            useDataStore.getState().setUserData(registerUserData?.data)
             console.log('User registered')
             navigate('/login')
 

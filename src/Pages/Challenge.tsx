@@ -1,9 +1,12 @@
 import { Chessboard } from "react-chessboard";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Chess, Move } from 'chess.js';
 import { CustomSquareStyles, Square } from 'react-chessboard/dist/chessboard/types';
 import { toast } from "react-toastify";
 import Challengeotherpart from "../components/Challengeotherpart";
+import { useAuth } from "../context/useContext";
+import { useNavigate } from "react-router";
+import { useDataStore } from "../zustand/usedatastore";
 
 type SquareStyles = {
   [key in Square]?: React.CSSProperties;
@@ -17,6 +20,78 @@ export default function Challenge() {
   const [rightClickedSquares, setRightClickedSquares] = useState({} as CustomSquareStyles);
   const [moveSquares] = useState({});
   const [optionSquares, setOptionSquares] = useState({});
+  const [gameHas2ndPlayerOrNot,setGameHas2ndPlayerOrNot] = useState(false)
+  const [show_player_2_howto_join_game_msg,setShow_player_2_howto_join_game_msg] = useState(true)
+  const userData = useDataStore(state => state.userData)
+  const gameMatchData = useDataStore(state => state.gameData)
+  
+  const ApiUrl = import.meta.env.VITE_BACKEND_REQUEST_URL
+  if(!ApiUrl || ApiUrl==null) console.log('Env variable not loaded')
+  const { token } = useAuth()
+  const navigate = useNavigate()
+
+  async function Add_Player_2_In_a_game(){
+    try {
+      const res = await fetch(`${ApiUrl}/g/add_player_2/`,{
+        method : 'POST',
+        headers : {
+          'Content-Type' : 'application/json',
+          'Authorizatoin': `Bearer ${token}`
+        }
+      })
+  
+      if(!res.ok){
+        console.error(await res.text())
+        return
+      }
+  
+      const data = await res.json()
+      console.log(data?.message)
+      // stop showing the player 2 to how to join the match 
+      setShow_player_2_howto_join_game_msg(false)
+      toast.success('player 2 has joined the game')
+    } catch (error) {
+      console.error(`Issue Occured while Adding player 2: ${error}`)
+    }
+  }
+
+  // check if game has 2nd player or not 
+  useEffect(() => {
+    async function checkIfGameHas2ndPlayer() {
+      try {
+        const res = await fetch(`${ApiUrl}/g/checkif_gamehas_player_2`,{
+          method : 'POST',
+          headers : {
+            'Content-Type' : 'application/json'
+          },
+          body : JSON.stringify({game_id:'dasd'})
+        })
+  
+        if(!res.ok){
+          console.error(await res.text())
+          return
+        }
+  
+        const data = await res.json()
+        console.log(data?.message)
+        if(data?.message == 'player_2_has_joined'){
+          setGameHas2ndPlayerOrNot(true)
+        } else {
+          await Add_Player_2_In_a_game()
+        }
+      } catch (error) {
+        console.error(`Issue Occured while checking if user has joined: ${error}`)
+      }
+    }
+
+    // checkIfGameHas2ndPlayer()
+  },[gameHas2ndPlayerOrNot])
+
+
+  // if not mean 2nd player hasnot joined yet -> then whenevr a new memeber clicked on it then this will work 
+  if(gameHas2ndPlayerOrNot == false){
+
+  }
 
   function getMoveOptions(square : Square) {
     const moves = game.moves({
@@ -160,8 +235,8 @@ export default function Challenge() {
   }
 
   return (
-      <div className="grid grid-cols-2 min-h-screen">
-        <div className="col-start-1 col-end-2">
+      <div className="grid grid-cols-2 min-h-screen bg-zinc-800 relative">
+        <div className={`col-start-1 col-end-2 ${show_player_2_howto_join_game_msg ? 'opacity-40' : ''}`}>
           <div className="z-50 flex items-center min-h-screen px-6">
               <Chessboard 
                 id="ClickToMove" 
@@ -173,7 +248,7 @@ export default function Challenge() {
                 onPromotionPieceSelect={onPromotionPieceSelect} 
                 boardWidth={500}
                 customBoardStyle={{
-                  borderRadius: "4px",
+                  borderRadius: "2px",
                   boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)"
                 }} 
                 customSquareStyles={{
@@ -186,9 +261,63 @@ export default function Challenge() {
               />
           </div>
         </div>
-        <div className="col-start-2 col-end-3">
+        <div className={`col-start-2 col-end-3 ${show_player_2_howto_join_game_msg ? 'opacity-40' : ''}`}>
           <Challengeotherpart />
         </div>
+          {
+            // show_player_2_howto_join_game_msg && gameMatchData.player_1 != userData.id && 
+            show_player_2_howto_join_game_msg && 
+            <div className="absolute flex flex-col items-center justify-center min-h-screen w-full">
+              <div className="bg-zinc-600 max-w-md w-96 h-72 rounded-sm">
+                <div className="flex flex-col items-center py-3">
+                  <div className="flex flex-col items-center justify-between min-h-52 gap-5">
+                    <p className="text-white text-sm">You can follow these steps to join this match.</p>
+                    {
+                      gameHas2ndPlayerOrNot ? 
+                      <p>Match is full try joining another game</p>
+                      :
+                      <>
+                        <div className="flex flex-col items-start text-white text-sm gap-2">
+                          <p>
+                            <span className="text-red-500 pr-1 font-semibold">1.</span>
+                            <span>First you need to create an account.</span>
+                          </p>
+                          <p>
+                            <span className="text-red-500 pr-1 font-semibold">2.</span>
+                            <span>Login into your account.</span>
+                          </p>
+                          <p>
+                            <span className="text-red-500 pr-1 font-semibold">3.</span>
+                            <span>Again click on the game link provided by the friend.</span>
+                          </p>
+                          <p>
+                            <span className="text-red-500 pr-1 font-semibold">4.</span>
+                            <span>Wait a sec you will automatically be redirected.</span>
+                          </p>
+                          <div className="flex flex-row self-start items-center justify-center">
+                            <button className="bg-slate-700 rounded px-4 py-2 text-xs hover:bg-slate-600" onClick={() => navigate('/login')}>Login page.</button>
+                          </div>
+                        </div>
+                        <p className="text-white text-sm">Enjoy the match... 😁</p>
+                      </>
+                    }
+                  </div>
+                </div>
+              </div> 
+            </div>
+          }
       </div>
   )
 }
+
+// things solved 
+// only player 2 will see the joining message  
+
+
+
+
+// => things to achieve 
+//  first check if both player are online 
+//  2nd check if 2nd player has join the game or not 
+//  show thw online players who is online
+// only show the helper page to join match to the player 2 if he is not logged in 

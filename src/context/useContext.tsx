@@ -19,7 +19,7 @@ const defaultValue: defaultContextValue = {
 
 const AuthContext = createContext<defaultContextValue>(defaultValue)
 
-const AuthProvider= async({children}:{children:React.ReactElement}) => {
+const AuthProvider= ({children}:{children:React.ReactElement}) => {
     const [isLoggedIn,setIsloggedIn] = useState(false);
     const navigate = useNavigate()
     const token = localStorage.getItem('Accesstoken')
@@ -37,7 +37,7 @@ const AuthProvider= async({children}:{children:React.ReactElement}) => {
         }
     },[token,navigate])
 
-     const loginUser = async({email,password}:SigninFormValues) => {
+    const loginUser = async({email,password}:SigninFormValues) => {
 
         const response = await fetch(`${ApiUrl}/u/login/`,{
             method : "POST",
