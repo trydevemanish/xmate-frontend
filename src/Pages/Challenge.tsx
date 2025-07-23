@@ -21,7 +21,7 @@ export default function Challenge() {
   const [moveSquares] = useState({});
   const [optionSquares, setOptionSquares] = useState({});
   const [gameHas2ndPlayerOrNot,setGameHas2ndPlayerOrNot] = useState(false)
-  const [show_player_2_howto_join_game_msg,setShow_player_2_howto_join_game_msg] = useState(true)
+  const [show_player_2_howto_join_game_msg,setShow_player_2_howto_join_game_msg] = useState(false)
   const userData = useDataStore(state => state.userData)
   const gameMatchData = useDataStore(state => state.gameData)
   
@@ -316,8 +316,8 @@ export default function Challenge() {
 
 
 
-// => things to achieve 
-//  first check if both player are online 
+// => things to achieve x
+//  first check if both player are online -> it mean to check if both pplayer are on the same page or not 
 //  2nd check if 2nd player has join the game or not 
 //  show thw online players who is online
 // only show the helper page to join match to the player 2 if he is not logged in 

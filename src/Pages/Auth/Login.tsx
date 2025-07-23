@@ -52,7 +52,7 @@ export default function Login() {
                     {
                         loading ? 
                         (
-                          <p>Wait logining <span className="animate-bounce duration-300 transition-all">...</span></p>  
+                          <p>Wait loging <span className="animate-bounce duration-300 transition-all">...</span></p>  
                         ) 
                         :
                         'login'

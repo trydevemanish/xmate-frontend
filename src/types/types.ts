@@ -11,6 +11,7 @@ export type SignupFormValues = {
 
 export type UserDataType = {
     id:number;
+    username:string;
     email:string;
     password:string;
     total_game_played:number;

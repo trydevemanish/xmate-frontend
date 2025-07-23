@@ -1,5 +1,5 @@
 import React,{ createContext, useContext, useEffect, useState } from "react"
-import { useNavigate } from "react-router";
+import { useNavigate,useLocation } from "react-router";
 import { SigninFormValues } from '../types/types'
 import { toast } from "react-toastify";
 
@@ -22,6 +22,7 @@ const AuthContext = createContext<defaultContextValue>(defaultValue)
 const AuthProvider= ({children}:{children:React.ReactElement}) => {
     const [isLoggedIn,setIsloggedIn] = useState(false);
     const navigate = useNavigate()
+    const location = useLocation()
     const token = localStorage.getItem('Accesstoken')
     const ApiUrl = import.meta.env.VITE_BACKEND_REQUEST_URL
 
@@ -30,11 +31,28 @@ const AuthProvider= ({children}:{children:React.ReactElement}) => {
     }
  
     useEffect(() => {
-        if(token){
-            navigate('/dashboard')
+        const { pathname } = location;
+
+        if(!token){
+            if(!pathname.startsWith('/challenge')){
+                if(pathname == '/'){
+                    navigate('/')
+                } else if (pathname == '/register'){
+                    navigate('/register')
+                } else {
+                    navigate('/login')
+                }
+            } 
         } else {
-            console.log('UnAuthorisied User')
+            if(!pathname.startsWith('/u/profile')){
+                if(pathname == '/'){
+                    navigate('/')
+                } else {
+                    navigate('/dashboard')
+                }
+            }
         }
+
     },[token,navigate])
 
     const loginUser = async({email,password}:SigninFormValues) => {

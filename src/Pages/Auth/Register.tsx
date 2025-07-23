@@ -9,8 +9,8 @@ import { useDataStore } from "../../zustand/usedatastore"
 
 export default function Register() {
     const { register, handleSubmit} = useForm<SignupFormValues>()
-    const ApiUrl = import.meta.env.VITE_BACKEND_REQUEST_UR
-    const { token } = useAuth()
+    const ApiUrl = import.meta.env.VITE_BACKEND_REQUEST_URL
+    const { token } = useAuth() 
     const navigate = useNavigate()
     const [loading,setloading] = useState(false)
     if(!token || token == null){
@@ -20,7 +20,8 @@ export default function Register() {
     const onSubmit = handleSubmit(async(data : SignupFormValues) => {
         try {
             setloading(true)
-            const res = await fetch(`${ApiUrl}/u/register`,{
+            console.log('making req to: ',`${ApiUrl}/u/register/`)
+            const res = await fetch(`${ApiUrl}/u/register/`,{
                 method : 'POST',
                 headers : {
                     'Content-Type' : 'application/json',
@@ -33,17 +34,18 @@ export default function Register() {
                 })
             })
     
-            if(res.ok){
+            if(!res.ok){
                 console.error(await res.text())
             }
     
             const registerUserData = await res.json()
-            if(registerUserData){console.error(await res.text())}
+            if(!registerUserData){console.error(await res.text())}
     
             toast.success(await registerUserData?.message)
+            console.log('registerUserData',registerUserData)
             //setting the user data in the store
             useDataStore.getState().setUserData(registerUserData?.data)
-            console.log('User registered')
+            // console.log('User registered')
             navigate('/login')
 
         } catch (error:any) {
@@ -64,7 +66,7 @@ export default function Register() {
         <form onSubmit={onSubmit} className="flex flex-col gap-2 text-base py-4">
             <div className="flex flex-col gap-3">
                 <label>FullName</label>
-                <input {...register("username")} type="email" className="min-w-72 py-[5px] text-sm border border-black rounded focus:outline-none px-2"/>
+                <input {...register("username")} type="text" className="min-w-72 py-[5px] text-sm border border-black rounded focus:outline-none px-2"/>
             </div>
             <div className="flex flex-col gap-3">
                 <label>Email</label>

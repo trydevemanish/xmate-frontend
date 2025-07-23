@@ -12,9 +12,9 @@ const Sidebarmenuoptions = [
   {
     menu : 'create your own match'
   },
-  {
-    menu : 'total matches played till'
-  },
+  // {
+  //   menu : 'total matches played till'
+  // },
 ]
 
 type Sidebarmenuoptiontype = {

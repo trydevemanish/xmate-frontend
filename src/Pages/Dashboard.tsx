@@ -19,7 +19,7 @@ export default function Dashboard() {
             {clickedMenu == 'leaderboard' && <LeaderBoard />}
             {clickedMenu == 'play with computer' && <CreateMatchwithcomputer />}
             {clickedMenu == 'create your own match' && <Creategame />}
-            {clickedMenu == 'total matches played till' && <TotalGamePlayed />}
+            {/* {clickedMenu == 'total matches played till' && <TotalGamePlayed />} */}
         </div>
     </div>
   )
