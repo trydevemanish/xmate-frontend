@@ -33,6 +33,15 @@ const AuthProvider= ({children}:{children:React.ReactElement}) => {
     useEffect(() => {
         const { pathname } = location;
 
+        // if user is offline then this message will pop up
+        if(!navigator.onLine){
+            console.log('User is offline- Failing in making req to Db')
+        }
+
+        if(token){
+            setIsloggedIn(true)
+        }
+
         if(!token){
             if(!pathname.startsWith('/challenge')){
                 if(pathname == '/'){
@@ -44,10 +53,12 @@ const AuthProvider= ({children}:{children:React.ReactElement}) => {
                 }
             } 
         } else {
-            if(!pathname.startsWith('/u/profile')){
+            if(!pathname.startsWith('/u/profile') && !pathname.startsWith('/challenge')){
                 if(pathname == '/'){
                     navigate('/')
-                } else {
+                } else if (pathname == '/login') {
+                    navigate('/login')
+                } else  {
                     navigate('/dashboard')
                 }
             }

@@ -1,6 +1,21 @@
-import { BsFillArrowRightCircleFill } from "react-icons/bs"
+// import { BsFillArrowRightCircleFill } from "react-icons/bs"
+// import { useLocation } from "react-router"
+import { UserDataType,GameMatchtype } from '../../types/types'
 
-function Challengeotherpart() {
+type props = {
+    gameid:string | undefined;
+    userData:UserDataType | undefined;
+    gamematchdata:GameMatchtype | undefined;
+    socket:WebSocket | undefined;
+    playerStatus : {
+      player1 : string;
+      player2 : string;
+    }
+}
+
+function Challengeotherpart({gameid,playerStatus}:props) { 
+  // const {pathname} = useLocation()
+  
   return (
     <div className='pt-5'>
       <p className='text-center text-sm text-white font-manrope'>The Game Data will show <span className='text-violet-500'>here.</span></p>
@@ -18,7 +33,14 @@ function Challengeotherpart() {
             </p>
           </div>
         </div>
-        <div className='col-start-3 col-end-9 ml-[2px]'>
+        <div className='col-start-3 col-end-5 ml-[2px]'>
+          <p className="bg-violet-500 text-white text-xs font-semibold py-1 text-center">player status</p>
+          <div className="flex flex-col gap-[1px] text-white">
+            <p className="text-center text-xs py-1 bg-zinc-600">p1-{playerStatus.player1}</p>
+            <p className="text-center text-xs py-1 bg-zinc-600">p2-{playerStatus.player2}</p>
+          </div>
+        </div>
+        <div className='col-start-5 col-end-9 ml-[2px]'>
           <p className="bg-violet-500 text-white text-xs font-semibold py-1 text-center">All moves</p>
           <div className="flex flex-col gap-[1px] text-white">
             <p className="text-center text-xs py-1 bg-zinc-600">player1 - d3</p>

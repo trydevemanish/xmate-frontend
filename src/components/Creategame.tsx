@@ -8,7 +8,7 @@ import Chessdesign2 from '../assets/chessdesign2.png'
 import { useAuth } from "../context/useContext"
 import { useNavigate } from "react-router"
 import { toast } from "react-toastify"
-import { useDataStore } from '../zustand/usedatastore'
+// import { useDataStore } from '../zustand/usedatastore'
 
 const chessDesign = [
   {
@@ -102,7 +102,7 @@ export default function Creategame() {
 
       // setting the game data here 
       setgame_id(CreatedMatchData?.data?.game_id)
-      useDataStore.getState().setGameData(CreatedMatchData?.data) // setting the newly created game data here 
+      // useDataStore.getState().setGameData(CreatedMatchData?.data) // setting the newly created game data here 
       toast.success('A new match has created')
       setGameCreated(true)
     } catch (error) {
@@ -203,7 +203,7 @@ export default function Creategame() {
           </div>
       }
       {
-        show_user_that_he_already_in_game && 
+        show_user_that_he_already_in_game ? 
         <div className="flex flex-col items-center pt-2 justify-center gap-3">
           <div className="bg-zinc-600 px-6 py-1 rounded-sm text-white font-manrope text-xs">
             <p>You are already in a game, you {"can't"} create a new game.</p>
@@ -221,6 +221,10 @@ export default function Creategame() {
             </button>
           </div>
         </div> 
+        :
+        <div className="bg-zinc-600 px-6 py-1 rounded-sm text-white font-manrope text-xs">
+          <p>No pending game, you can create new game.</p>
+        </div>
       }
     </div>
   )

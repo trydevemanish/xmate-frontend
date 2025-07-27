@@ -89,7 +89,7 @@ export default function Profile() {
         setloading(false)
       }
     }
-    // getLoggedInUserDetail()
+    getLoggedInUserDetail()
   },[])
 
   useEffect(() => {
@@ -122,7 +122,7 @@ export default function Profile() {
       throw new Error(`Issue Occured getting user data: ${error}`)
     }
   }
-  // fetchRecent_two_game()
+  fetchRecent_two_game()
   },[token])
 
   const userStatsCardData= [
