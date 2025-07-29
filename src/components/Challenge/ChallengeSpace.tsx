@@ -32,6 +32,11 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
         player2: 'offline',
     });
 
+    const [moveMadeFromtoTheDestination,setMoveMadeFromtoTheDestination] = useState('')
+    const [playerTurn,setPlayerTurn] = useState('')
+    const [gameFenStringFromBackend,setGameFenStringFromBackend] = useState('')
+    
+
 
     useEffect(() => {
         if (!gameid || !userData) {
@@ -64,8 +69,13 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
                 } else if (gamematchdata?.player_2 == userData.id && data.user == userData.username){
                     setPlayerStatus((prev) => ({ ...prev, player2: data.status }));
                 }
+            } else if (data.action === 'make-move'){
+                console.log(`Fen string from backend: ${data.fen} and the turn: ${data.turn}`)
+            } else if (data.action === 'game-event'){
+                console.log(`message from the backend check for : ${data.event} && message: ${data?.message}`)
             }
         };
+
 
         socketInstace.onclose = () => {
             console.log('socket disconnected')
@@ -82,12 +92,29 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
 
     },[gameid, userData, gamematchdata])
 
+    function playerMakingMove(move:string){
+        if(socket || typeof userData != undefined || userData){
+            // step 1 - > show this move to the people of the group
+            if(!move){
+                console.log('move not found')
+                return;
+            }
 
+            console.log('move type',typeof move)
+            console.log('move',move)
+
+            socket?.send(JSON.stringify({
+                action: 'make-move',
+                move_passed: move
+            }))
+        }
+    }
+    
     
     function getMoveOptions(square : Square) {
         const moves = game.moves({
-        square,
-        verbose: true
+            square,
+            verbose: true
         });
 
         if (moves.length === 0) {
@@ -112,8 +139,8 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
         }
 
         if(game.isCheckmate()){
-        toast.info('Checkmate')
-        return;
+            toast.info('Checkmate')
+            return;
         }
 
         const newSquares : SquareStyles = {};
@@ -127,6 +154,8 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
             background: pieceAtTo && pieceAtFrom && pieceAtTo.color !== pieceAtFrom.color ? "radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)" : "radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)",
             borderRadius: "50%"
         }
+
+        // console.log('Move',move.from, move.to)
 
         return move;
         })
@@ -144,68 +173,75 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
         setRightClickedSquares({});
 
         if (!moveFrom) {
-        const hasMoveOptions = getMoveOptions(square);
-        if (hasMoveOptions) setMoveFrom(square);
-        return;
-        }
-
-        if (!moveTo) {
-        const moves = game.moves({
-            square:moveFrom as Square,
-            verbose: true
-        });
-
-        const foundMove = moves.find((m:any) => m.from === moveFrom && m.to === square);
-
-        if (!foundMove) {
-            const hasMoveOptions = getMoveOptions(square);
-            setMoveFrom(hasMoveOptions ? square : "");
-            return;
-        }
-
-        setMoveTo(square);
-
-        if (foundMove.color === "w" && foundMove.piece === "p" && square[1] === "8" || foundMove.color === "b" && foundMove.piece === "p" && square[1] === "1") {
-            setShowPromotionDialog(true);
-            return;
-        }
-
-        const gameCopy = new Chess(game.fen());
-
-
-        const move = gameCopy.move({
-            from: moveFrom,
-            to: square,
-            promotion: "q"
-        });
-
-        if (move === null) {
             const hasMoveOptions = getMoveOptions(square);
             if (hasMoveOptions) setMoveFrom(square);
             return;
         }
 
-        setGame(gameCopy);
-        setMoveFrom("");
-        setMoveTo(null);
-        setOptionSquares({});
-        return;
+        if (!moveTo) {
+            const moves = game.moves({
+                square:moveFrom as Square,
+                verbose: true
+            });
+
+            const foundMove = moves.find((m:any) => m.from === moveFrom && m.to === square);
+
+            if (!foundMove) {
+                const hasMoveOptions = getMoveOptions(square);
+                setMoveFrom(hasMoveOptions ? square : "");
+                return;
+            }
+
+            setMoveTo(square);
+
+            if (foundMove.color === "w" && foundMove.piece === "p" && square[1] === "8" || foundMove.color === "b" && foundMove.piece === "p" && square[1] === "1") {
+                setShowPromotionDialog(true);
+                return;
+            }
+
+            const gameCopy = new Chess(game.fen());
+
+            const move = gameCopy.move({
+                from: moveFrom,
+                to: square,
+                promotion: "q"
+            });
+
+            if (move === null) {
+                const hasMoveOptions = getMoveOptions(square);
+                if (hasMoveOptions) setMoveFrom(square);
+                return;
+            }
+
+            // console.log('moves checking',`${move.from}${move.to}`)
+            console.log('calling the function after making the move')
+            playerMakingMove(`${move.from}${move.to}`)
+            // playerMakingMove(move)
+
+            setMoveMadeFromtoTheDestination(`${move.from}-${move.to}`)
+
+            setGame(gameCopy);
+            setMoveFrom("");
+            setMoveTo(null);
+            setOptionSquares({});
+            return;
         }
     }
 
     function onPromotionPieceSelect(piece:any) {
         if (piece) {
             const gameCopy : any = {
-            ...game
+                ...game
             };
 
             gameCopy.move({
-            from: moveFrom,
-            to: moveTo,
-            promotion: piece[1].toLowerCase() ?? "q"
+                from: moveFrom,
+                to: moveTo,
+                promotion: piece[1].toLowerCase() ?? "q"
             });
 
             setGame(gameCopy);
+            console.log('GaweCopy',gameCopy)
         }
         setMoveFrom("");
         setMoveTo(null);
@@ -213,16 +249,6 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
         setOptionSquares({});
 
         return true;
-    }
-
-    function onSquareRightClick(square : Square) {
-        const colour = "rgba(0, 0, 255, 0.4)";
-        setRightClickedSquares({
-        ...rightClickedSquares,
-        [square]: rightClickedSquares[square] && rightClickedSquares[square].backgroundColor === colour ? undefined : {
-            backgroundColor: colour
-        }
-        })
     }
 
   return (
@@ -235,7 +261,6 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
                     arePiecesDraggable={false} 
                     position={game.fen()} 
                     onSquareClick={onSquareClick} 
-                    onSquareRightClick={onSquareRightClick} 
                     onPromotionPieceSelect={onPromotionPieceSelect} 
                     boardWidth={500}
                     customBoardStyle={{
