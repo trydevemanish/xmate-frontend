@@ -6,6 +6,7 @@ import { CustomSquareStyles, Square } from 'react-chessboard/dist/chessboard/typ
 import { toast } from "react-toastify";
 import Challengeotherpart from './Challengeotherpart';
 import { UserDataType,GameMatchtype } from '../../types/types'
+import { string } from 'zod';
 
 type SquareStyles = {
   [key in Square]?: React.CSSProperties;
@@ -31,6 +32,7 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
         player1: 'offline',
         player2: 'offline',
     });
+    const ApiUrl = import.meta.env.VITE_BACKEND_REQUEST_URL
 
     const [moveMadeFromtoTheDestination,setMoveMadeFromtoTheDestination] = useState('')
     const [playerTurn,setPlayerTurn] = useState('White')
@@ -84,10 +86,25 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
                     //game stop and show a message that the player won and made some changes to update the user,leaderboard,game model feilds
                     setIsGameCheckMate(true)
                     setCheckMateMessage(data?.message)
+                    setwarning_msgtoshow(data?.message)
                     if(data?.message.include('White')){
                         // probabaly player 1 aka white win - updating stats based on this
+                        if(userData.id === gamematchdata?.player_1){
+                            // this will update the game stats 
+                            handleFunctionToUpdateGameStatsAfterCheckMate(userData.id)
+                            handleFunctiontoUpdate_Winner_UserStatsAfterCheckMate(userData.id)
+                        } else  {
+                            handleFunctiontoUpdate_Looser_UserStatsAfterCheckMate(userData.id)
+                        }
                     } else {
                         // probabaly player 2 aka Black win - updating stats based on this
+                        if(userData.id === gamematchdata?.player_2){
+                            // this will update the game stats 
+                            handleFunctionToUpdateGameStatsAfterCheckMate(userData.id)
+                            handleFunctiontoUpdate_Winner_UserStatsAfterCheckMate(userData.id)
+                        } else  {
+                            handleFunctiontoUpdate_Looser_UserStatsAfterCheckMate(userData.id)
+                        }
                     }
                 } else {
                     if(data.event == 'move_not_legal') {
@@ -119,6 +136,7 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
 
     },[gameid, userData, gamematchdata])
 
+    // player making move 
     function playerMakingMove(move:string){
         if(socket || typeof userData != undefined || userData){
             // step 1 - > show this move to the people of the group
@@ -139,6 +157,7 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
         }
     }
 
+    // player passing last message 
     function passingLastMessagetoEachOther(message:string){
         if(socket || typeof userData != undefined || userData){
             // step 1 - > show this move to the people of the group
@@ -150,8 +169,95 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
             }))
         }
     }
+
+    // updating the game states after checkmate 
+    async function handleFunctionToUpdateGameStatsAfterCheckMate(userid:number){
+       try {
+        const res = await fetch(`${ApiUrl}/g/updatestats_aftercheckmate/`,{
+            method : 'POST',
+            headers : {
+                'Content-Type' : 'application/json'
+            },
+            body : JSON.stringify({ userid:userid,gameid:gameid })
+        })
+ 
+        if(!res.ok){
+            console.log(await res.text())
+            return;
+        }
+ 
+        const data = await res.json()
+        if(!data){
+            console.log('Issue While Converting into json')
+            return;
+        }
+ 
+        console.log(data?.message)
+       } catch (error) {
+            console.log(`Failed to Update Game state after winning...: ${error}`)
+            return;
+       }
+    }
+
+    // updating the winner user stats after winning 
+    async function handleFunctiontoUpdate_Winner_UserStatsAfterCheckMate(userid:number){
+        try {
+            const res = await fetch(`${ApiUrl}/u/update_winner_statsaftercheckmate/`,{
+                method : 'POST',
+                headers : {
+                    'Content-Type' : 'application/json'
+                },
+                body : JSON.stringify({ userid:userid })
+            })
     
+            if(!res.ok){
+                console.log(await res.text())
+                return;
+            }
     
+            const data = await res.json()
+            if(!data){
+                console.log('Issue While Converting into json')
+                return;
+            }
+    
+            console.log(data?.message)
+       } catch (error) {
+            console.log(`Failed to Update Winner User state after winning...: ${error}`)
+            return;
+       }
+    }
+
+    // updating the losser user stats after loosing 
+    async function handleFunctiontoUpdate_Looser_UserStatsAfterCheckMate(userid:number){
+        try {
+            const res = await fetch(`${ApiUrl}/u/update_looser_statsaftercheckmate/`,{
+                method : 'POST',
+                headers : {
+                    'Content-Type' : 'application/json'
+                },
+                body : JSON.stringify({ userid:userid })
+            })
+    
+            if(!res.ok){
+                console.log(await res.text())
+                return;
+            }
+    
+            const data = await res.json()
+            if(!data){
+                console.log('Issue While Converting into json')
+                return;
+            }
+    
+            console.log(data?.message)
+        } catch (error) {
+            console.log(`Failed to Update Looser User state after winning...: ${error}`)
+            return;
+        }
+    }
+
+
     function getMoveOptions(square : Square) {
         const moves = game.moves({
             square,
