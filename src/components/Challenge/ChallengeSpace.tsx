@@ -33,10 +33,15 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
     });
 
     const [moveMadeFromtoTheDestination,setMoveMadeFromtoTheDestination] = useState('')
-    const [playerTurn,setPlayerTurn] = useState('')
-    const [gameFenStringFromBackend,setGameFenStringFromBackend] = useState('')
-    
+    const [playerTurn,setPlayerTurn] = useState('White')
+    const [gameFenStringFromBackend,setGameFenStringFromBackend] = useState('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+    const [warning_msgtoshow,setwarning_msgtoshow] = useState('No message')
+    const [inputValue,setInputValue] = useState('')
+    const [lastMessages,setLastMessages] = useState([])
 
+    const [isGameCheckMate,setIsGameCheckMate] = useState(false)
+    const [checkMateMessage,setCheckMateMessage] = useState('')
+    
 
     useEffect(() => {
         if (!gameid || !userData) {
@@ -70,9 +75,31 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
                     setPlayerStatus((prev) => ({ ...prev, player2: data.status }));
                 }
             } else if (data.action === 'make-move'){
-                console.log(`Fen string from backend: ${data.fen} and the turn: ${data.turn}`)
+                // console.log(`Fen string from backend: ${data.fen} and the turn: ${data.turn}`)
+                setGameFenStringFromBackend(data.fen)
+                setPlayerTurn(data.turn)
             } else if (data.action === 'game-event'){
-                console.log(`message from the backend check for : ${data.event} && message: ${data?.message}`)
+                console.log(`message from the backend check for : ${data.event} && message: ${data?.message} in game-event action`)
+                if (data.event == 'checkmate'){
+                    //game stop and show a message that the player won and made some changes to update the user,leaderboard,game model feilds
+                    setIsGameCheckMate(true)
+                    setCheckMateMessage(data?.message)
+                    if(data?.message.include('White')){
+                        // probabaly player 1 aka white win - updating stats based on this
+                    } else {
+                        // probabaly player 2 aka Black win - updating stats based on this
+                    }
+                } else {
+                    if(data.event == 'move_not_legal') {
+                        setwarning_msgtoshow(data?.message)
+                    } else if (data.event == 'check'){
+                        setwarning_msgtoshow(data ?.message)
+                    } else if (data.event == 'stalemate'){
+                        setwarning_msgtoshow(data?.message)
+                    }
+                }
+            } else if (data.action == 'last-message') {
+                console.log(`msg: ${data.message}`)
             }
         };
 
@@ -103,9 +130,23 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
             console.log('move type',typeof move)
             console.log('move',move)
 
+            setwarning_msgtoshow('No message')
+
             socket?.send(JSON.stringify({
                 action: 'make-move',
                 move_passed: move
+            }))
+        }
+    }
+
+    function passingLastMessagetoEachOther(message:string){
+        if(socket || typeof userData != undefined || userData){
+            // step 1 - > show this move to the people of the group
+            console.log('message',message)
+
+            socket?.send(JSON.stringify({
+                action: 'last-message',
+                message: message
             }))
         }
     }
@@ -217,7 +258,6 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
             console.log('calling the function after making the move')
             playerMakingMove(`${move.from}${move.to}`)
             // playerMakingMove(move)
-
             setMoveMadeFromtoTheDestination(`${move.from}-${move.to}`)
 
             setGame(gameCopy);
@@ -252,34 +292,85 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
     }
 
   return (
-    <div className="grid grid-cols-2 min-h-screen bg-zinc-800 relative">
-        <div className={`col-start-1 col-end-2`}>
-            <div className="z-50 flex items-center min-h-screen px-6">
-                <Chessboard 
-                    id="ClickToMove" 
-                    animationDuration={200} 
-                    arePiecesDraggable={false} 
-                    position={game.fen()} 
-                    onSquareClick={onSquareClick} 
-                    onPromotionPieceSelect={onPromotionPieceSelect} 
-                    boardWidth={500}
-                    customBoardStyle={{
-                    borderRadius: "2px",
-                    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)"
-                    }} 
-                    customSquareStyles={{
-                    ...moveSquares,
-                    ...optionSquares,
-                    ...rightClickedSquares
-                    }} 
-                    promotionToSquare={moveTo} 
-                    showPromotionDialog={showPromotionDialog}
-                />
+    <div className={`grid grid-cols-2 min-h-screen bg-zinc-800 relative`}>
+        <div className={`col-start-1 ${isGameCheckMate ? 'opacity-50' : '' } col-end-2`}>
+            <div className='flex flex-col items-center min-h-screen justify-center'>
+                <div className='flex flex-col gap-[3px] items-start'>
+                    <p className='px-6 text-white font-manrope text-xs'>player_2 
+                        <span className='text-center text-xs'>
+                            {gamematchdata?.player_2 == userData?.id && playerTurn == 'Black' ? ' - your turn' : ''}
+                        </span>
+                    </p>
+                    <div className="z-50 flex items-center px-6">
+                        <Chessboard 
+                            id="ClickToMove" 
+                            animationDuration={200} 
+                            arePiecesDraggable={false} 
+                            position={gameFenStringFromBackend} 
+                            onSquareClick={onSquareClick} 
+                            onPromotionPieceSelect={onPromotionPieceSelect} 
+                            boardWidth={500}
+                            customBoardStyle={{
+                            borderRadius: "2px",
+                            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)"
+                            }} 
+                            customSquareStyles={{
+                            ...moveSquares,
+                            ...optionSquares,
+                            ...rightClickedSquares
+                            }} 
+                            promotionToSquare={moveTo} 
+                            showPromotionDialog={showPromotionDialog}
+                        />
+                    </div>
+                    <p className='px-6 text-white font-manrope text-xs'>player_1 
+                        <span className='text-xs'>
+                            {gamematchdata?.player_1 == userData?.id && playerTurn == 'White' ? ' - your turn' : ''}
+                        </span>
+                    </p>
+                </div>
             </div>
         </div>
-        <div className={`col-start-2 col-end-3`}>
-            <Challengeotherpart gameid={gameid} userData={userData} gamematchdata={gamematchdata} socket={socket}  playerStatus={playerStatus} />
+        <div className={`col-start-2 ${isGameCheckMate ? 'opacity-50' : '' } col-end-3`}>
+            <Challengeotherpart gameid={gameid} moveMadeFromtoTheDestination={moveMadeFromtoTheDestination} userData={userData} gamematchdata={gamematchdata} socket={socket} playerTurn={playerTurn} playerStatus={playerStatus} warning_msgtoshow={warning_msgtoshow} />
         </div>
+
+        {
+            isGameCheckMate && 
+            <div className='absolute flex flex-col items-center min-h-screen justify-center w-full bg-black/30'>
+                    <div className='bg-zinc-700 rounded-sm shadow-xl px-8 py-6 font-manrope w-[480px] transform transition-all'>
+                        <div className='space-y-4'>
+                            <div className='text-center space-y-2'>
+                                <h2 className='text-lg font-manrope font-bold text-gray-800'>Game Ended!</h2>
+                                <p className='text-xl font-semibold text-emerald-600'>{checkMateMessage != '' ? checkMateMessage : 'Ruko yr dek rha hai' } 🏆</p>
+                                <p className='text-white text-xs'>All the states will be updated</p>
+                                <div className='bg-emerald-100 text-emerald-800 px-4 py-1  rounded-full text-xs inline-block'>
+                                    Game Status: Completed
+                                </div>
+                            </div>
+                            
+                            <div className='mt-9 pt-6 space-y-2'>
+                                <p className='text-white text-xs font-manrope font-medium'>Last Message to each other.</p>
+                                <div className='flex gap-2 text-sm'>
+                                    <input 
+                                        type="text" 
+                                        value={inputValue}
+                                        className='flex-1 px-4 border text-xs border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-emerald-500'
+                                        onChange={(e) => setInputValue(e.target.value)}
+                                        placeholder="Type your message..."
+                                    />
+                                    <button onClick={() => passingLastMessagetoEachOther(inputValue)}  className='px-4 py-[5px] bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors'>
+                                        Send
+                                    </button>
+                                </div>
+                                <div className='bg-gray-50 p-4 rounded-xs max-h-32 overflow-y-auto'>
+                                    <p className='text-gray-600 text-sm'>No messages yet</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        }
     </div>
   )
 }
