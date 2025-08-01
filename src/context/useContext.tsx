@@ -2,6 +2,7 @@ import React,{ createContext, useContext, useEffect, useState } from "react"
 import { useNavigate,useLocation } from "react-router";
 import { SigninFormValues } from '../types/types'
 import { toast } from "react-toastify";
+import {jwtDecode} from "jwt-decode";
 
 type defaultContextValue = {
     isLoggedIn:boolean;
@@ -36,6 +37,7 @@ const AuthProvider= ({children}:{children:React.ReactElement}) => {
         // if user is offline then this message will pop up
         if(!navigator.onLine){
             console.log('User is offline- Failing in making req to Db')
+            toast.dark('User is Offline trying to connect.. refresh the page')
         }
 
         if(token){
@@ -89,7 +91,6 @@ const AuthProvider= ({children}:{children:React.ReactElement}) => {
 
         if(data?.message == 'Login successfully'){
             localStorage.setItem("Accesstoken",data?.access_token)
-            localStorage.setItem("refreshToken",data?.refresh_token)
         }
 
         toast.success('login success')

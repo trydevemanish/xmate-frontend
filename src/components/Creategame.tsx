@@ -8,6 +8,7 @@ import Chessdesign2 from '../assets/chessdesign2.png'
 import { useAuth } from "../context/useContext"
 import { useNavigate } from "react-router"
 import { toast } from "react-toastify"
+import { FiLoader } from "react-icons/fi"
 // import { useDataStore } from '../zustand/usedatastore'
 
 const chessDesign = [
@@ -26,6 +27,7 @@ const chessDesign = [
 export default function Creategame() {
   const [loadingState,setLoadingState] = useState(false)
   const [gameCreated,setGameCreated] = useState(false)
+  const [fethchingPendingGameState,setFethchingPendingGameState] = useState(false)
   const [clickedImageId, setClickedImageId] = useState(0);
   const [show_user_that_he_already_in_game,setShow_user_that_he_already_in_game] = useState(false)
   const [pending_game_id,set_pending_game_id] = useState('')
@@ -40,6 +42,8 @@ export default function Creategame() {
   useEffect(() => {
     const fetchPendingGame = async() => {
       try {
+        setFethchingPendingGameState(true)
+
         const res = await fetch(`${ApiUrl}/g/pending_game/`,{
           method : "GET",
           headers : {
@@ -60,10 +64,16 @@ export default function Creategame() {
         }
 
         console.log(data)
-        set_pending_game_id(data?.data?.game_id)
-        setShow_user_that_he_already_in_game(true)
+
+        if(data?.message != 'No game is pending'){
+          set_pending_game_id(data?.data?.game_id)
+          setShow_user_that_he_already_in_game(true)
+        }
+
       } catch (error) {
         console.error(`Issue Occured while fetching Pending game : ${error}`)
+      } finally {
+        setFethchingPendingGameState(false)
       }
     }
     fetchPendingGame()
@@ -202,28 +212,37 @@ export default function Creategame() {
             </div>
           </div>
       }
+
       {
-        show_user_that_he_already_in_game ? 
-        <div className="flex flex-col items-center pt-2 justify-center gap-3">
+        !fethchingPendingGameState ? 
+        show_user_that_he_already_in_game ?
+          <div className="flex flex-col items-center pt-2 justify-center gap-3">
+            <div className="bg-zinc-600 px-6 py-1 rounded-sm text-white font-manrope text-xs">
+              <p>You are already in a game, you {"can't"} create a new game.</p>
+              <p className="text-center pt-1">complete your pending match, or delete this one .</p>
+            </div>
+            <div className="flex flex-row items-center gap-3">
+              <button className="text-xs bg-zinc-500 px-5 py-1 rounded-sm text-white hover:bg-zinc-400" onClick={() => navigate(`/challenge/u/${pending_game_id}`)}>move to pending match</button>
+              <button className="text-xs bg-red-500  px-5 py-1 hover:bg-red-400 rounded-sm text-white" onClick={() => deletePendingGame(pending_game_id)}>
+                {
+                  deleteing_pending_game ? 
+                  <span className="animate-pulse opacity-55">wait deleting ...</span>
+                  :
+                  'delete it'
+                }
+              </button>
+            </div>
+          </div>
+          :
           <div className="bg-zinc-600 px-6 py-1 rounded-sm text-white font-manrope text-xs">
-            <p>You are already in a game, you {"can't"} create a new game.</p>
-            <p className="text-center pt-1">complete your pending match, or delete this one .</p>
+            <p>No pending game, you can create new game.</p>
           </div>
-          <div className="flex flex-row items-center gap-3">
-            <button className="text-xs bg-zinc-500 px-5 py-1 rounded-sm text-white hover:bg-zinc-400" onClick={() => navigate(`/challenge/u/${pending_game_id}`)}>move to pending match</button>
-            <button className="text-xs bg-red-500  px-5 py-1 hover:bg-red-400 rounded-sm text-white" onClick={() => deletePendingGame(pending_game_id)}>
-              {
-                deleteing_pending_game ? 
-                <span className="animate-pulse opacity-55">wait deleting ...</span>
-                :
-                'delete it'
-              }
-            </button>
-          </div>
-        </div> 
         :
-        <div className="bg-zinc-600 px-6 py-1 rounded-sm text-white font-manrope text-xs">
-          <p>No pending game, you can create new game.</p>
+        <div className=" bg-zinc-700 px-6 py-1 rounded-sm text-white font-manrope text-xs">
+          <p className="flex flex-row items-center gap-1">
+            <span><FiLoader className="size-3 animate-spin stroke-white stroke-2" /></span>
+            <span>Wait fetching pending game.</span>
+          </p>
         </div>
       }
     </div>

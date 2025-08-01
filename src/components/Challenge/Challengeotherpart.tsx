@@ -1,5 +1,3 @@
-// import { BsFillArrowRightCircleFill } from "react-icons/bs"
-// import { useLocation } from "react-router"
 import { useEffect, useState } from 'react';
 import { UserDataType,GameMatchtype } from '../../types/types'
 
@@ -20,16 +18,14 @@ type props = {
 // player_1->p1->White
 // player_2->p2->Black
 
-function Challengeotherpart({gameid,playerTurn,warning_msgtoshow,moveMadeFromtoTheDestination,playerStatus,userData,gamematchdata}:props) { 
-  // const {pathname} = useLocation()
-  const [gameMatchMoves,setGameMatchMoves] = useState(gamematchdata?.moves)
-
+function Challengeotherpart({playerTurn,warning_msgtoshow,moveMadeFromtoTheDestination,playerStatus,userData,gamematchdata}:props) { 
+  const [gameMatchMoves,setGameMatchMoves] = useState<string[]>(gamematchdata?.moves || [])
   useEffect(() => {
-    if(moveMadeFromtoTheDestination != ''){
+    if(moveMadeFromtoTheDestination.trim()){
       // add this new coming move to the game match moves with the previous messages .
-      // setGameMatchMoves()
+      setGameMatchMoves((prevdata) => [...prevdata,moveMadeFromtoTheDestination])
     }
-  },[])
+  },[gameMatchMoves])
 
   return (
     <div className='pt-5'>
@@ -49,9 +45,14 @@ function Challengeotherpart({gameid,playerTurn,warning_msgtoshow,moveMadeFromtoT
                   <span className="bg-black size-2 rounded-full"></span>
                   <span>player_2 {gamematchdata?.player_2 == userData?.id ? userData?.username : ''}</span>
                 </p>
-                <p className={`flex flex-row bg-zinc-700 py-1 items-center justify-center ${playerTurn == 'White' ? 'bg-zinc-700' : 'bg-white text-zinc-700'} gap-4`}>
+
+                <p className={`flex flex-row py-1 items-center justify-center 
+                  ${playerTurn.trim() === 'White' ? 'bg-zinc-700' : 'bg-white text-zinc-700'}
+                 gap-4`}
+                >
                   Turn -  {playerTurn} Ki Bajji Hai
                 </p>
+
               </div>
             </div>
 
@@ -60,17 +61,18 @@ function Challengeotherpart({gameid,playerTurn,warning_msgtoshow,moveMadeFromtoT
               <div className="flex flex-col gap-[1px] text-white">
                 <p className={`text-center text-xs py-1 bg-zinc-600 `}>
                   p1 - 
-                  <span className={` ${playerStatus.player1 == 'online' ? 'bg-green-400': 'bg-red-400'} ml-1 text-[9px] px-2 py-[2px] rounded-3xl`}>
+                  <span className={` ${playerStatus.player1 == 'online' ? 'bg-emerald-400': 'bg-red-400'} ml-1 text-[9px] px-2 py-[2px] rounded-3xl`}>
                     {playerStatus.player1}
                   </span>
                 </p>
                 <p className="text-center text-xs py-1 bg-zinc-600">p2 -
-                  <span className={` ${playerStatus.player1 == 'online' ? 'bg-green-400': 'bg-red-400'} ml-1 text-[9px] px-2 py-[2px] rounded-3xl`}>
+                  <span className={` ${playerStatus.player2 == 'online' ? 'bg-emerald-400': 'bg-red-400'} ml-1 text-[9px] px-2 py-[2px] rounded-3xl`}>
                     {playerStatus.player2}
                   </span>
                 </p>
               </div>
             </div>
+
           </div>
 
           <div className={`flex flex-col bg-zinc-700 py-2 items-center justify-center mt-[2px]`}>
@@ -82,30 +84,23 @@ function Challengeotherpart({gameid,playerTurn,warning_msgtoshow,moveMadeFromtoT
         <div className='col-start-5 col-end-9 ml-[2px]'>
           <p className="bg-violet-500 text-white text-xs font-semibold py-1 text-center">All moves</p>
             {
-              gamematchdata && gamematchdata.moves && gameMatchMoves != undefined ?
-              <>
+              Array.isArray(gameMatchMoves) && gameMatchMoves.length > 0 ?
+              <div className="flex flex-col gap-[1px] text-white">
                 {
-                  Array.isArray(gamematchdata.moves) && gameMatchMoves.length > 0 ?
-                  <div className="flex flex-col gap-[1px] text-white">
-                    {
-                      gameMatchMoves.map((data:string,idx:number) => (
-                        <>
-                          {
-                            idx % 2 == 0 ? 
-                            <p className="text-center text-white text-xs py-1 bg-zinc-600" key={idx}>p1 - d3</p>
-                            :
-                            <p className="text-cente text-white text-xs py-1 bg-zinc-700" key={idx}>p2 - d3</p>
-                          }
-                        </>
-                      ))
-                    }
-                  </div>
-                  :
-                  <p className="text-center text-xs text-white  py-1 bg-zinc-700">moves array is empty</p>
+                  gameMatchMoves.map((data,idx) => (
+                    <p key={idx}>
+                      {
+                        idx % 2 == 0 ? 
+                        <span className="text-center text-white inline-block w-full text-xs py-1 bg-zinc-600">p1 - {data}</span>
+                        :
+                        <span className="text-center text-white inline-block w-full text-xs py-1 bg-zinc-700">p2 - {data}</span>
+                      }
+                    </p>
+                  ))
                 }
-              </>
+              </div>
               :
-              <p className="text-center text-xs text-white py-1 bg-zinc-700">Game match data is undefined!</p>
+              <p className="text-center text-xs text-white  py-1 bg-zinc-700">moves array is empty</p>
             }
         </div>
       </div>

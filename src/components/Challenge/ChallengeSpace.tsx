@@ -6,7 +6,6 @@ import { CustomSquareStyles, Square } from 'react-chessboard/dist/chessboard/typ
 import { toast } from "react-toastify";
 import Challengeotherpart from './Challengeotherpart';
 import { UserDataType,GameMatchtype } from '../../types/types'
-import { string } from 'zod';
 
 type SquareStyles = {
   [key in Square]?: React.CSSProperties;
@@ -35,17 +34,19 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
     const ApiUrl = import.meta.env.VITE_BACKEND_REQUEST_URL
 
     const [moveMadeFromtoTheDestination,setMoveMadeFromtoTheDestination] = useState('')
-    const [playerTurn,setPlayerTurn] = useState('White')
+    const [playerTurn,setPlayerTurn] = useState<'White' | 'Black'>('White')
     const [gameFenStringFromBackend,setGameFenStringFromBackend] = useState('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
     const [warning_msgtoshow,setwarning_msgtoshow] = useState('No message')
     const [inputValue,setInputValue] = useState('')
-    const [lastMessages,setLastMessages] = useState([])
+    const [lastMessages,setLastMessages] = useState<string[]>()
 
     const [isGameCheckMate,setIsGameCheckMate] = useState(false)
     const [checkMateMessage,setCheckMateMessage] = useState('')
+    const [isPlayerTurn, setIsPlayerTurn] = useState<boolean>(false);
     
 
     useEffect(() => {
+
         if (!gameid || !userData) {
             console.log('Game id and userData is null')
             return ;
@@ -56,30 +57,41 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
             return;
         }
 
-        const socketInstace = new WebSocket(`ws://127.0.0.1:8000/ws/game/${gameid}/?user=${userData.username}`)
+        // const socketInstace = new WebSocket(`ws://127.0.0.1:8000/ws/game/${gameid}/?user=${userData.username}`)
+        const socketInstace = new WebSocket(`ws://127.0.0.1:8000/ws/game/${gameid}/?user=${userData.username}&user_id=${userData.id}`)
 
         socketInstace.onopen = () => {
             console.log('Socket Connected')
 
-            socketInstace.send(JSON.stringify({
-                action: 'online-status',
-                online: 'online'
-            }))
+            // socketInstace.send(JSON.stringify({
+            //     action: 'online-status',
+            //     online: 'online'
+            // }))
         }
 
         socketInstace.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            if (data.action === 'online-status') {
-                console.log(`User ${data.user} is ${data.status}`);
-                if(gamematchdata?.player_1 == userData.id && data.user == userData.username ){
-                    setPlayerStatus((prev) => ({ ...prev, player1: data.status }));
-                } else if (gamematchdata?.player_2 == userData.id && data.user == userData.username){
-                    setPlayerStatus((prev) => ({ ...prev, player2: data.status }));
-                }
+            if (data.action === 'update-player-status') {
+                console.log(`player status : ${data.status}`);
+                setPlayerStatus(data?.player_status)
+
+                // if(gamematchdata?.player_1 == userData.id && data.user == userData.username ){
+                //     setPlayerStatus((prev) => ({ ...prev, player1: data.status }));
+                // } else if (gamematchdata?.player_2 == userData.id && data.user == userData.username){
+                //     setPlayerStatus((prev) => ({ ...prev, player2: data.status }));
+                // }
+
             } else if (data.action === 'make-move'){
                 // console.log(`Fen string from backend: ${data.fen} and the turn: ${data.turn}`)
                 setGameFenStringFromBackend(data.fen)
                 setPlayerTurn(data.turn)
+
+                if(gamematchdata?.player_1 == userData.id){ // on player 1 machine ( white turn )
+                    setIsPlayerTurn(data.turn === 'White')
+                } else { // on player 2 machine ( Black turn )
+                    setIsPlayerTurn(data.turn === 'Black')
+                }
+
             } else if (data.action === 'game-event'){
                 console.log(`message from the backend check for : ${data.event} && message: ${data?.message} in game-event action`)
                 if (data.event == 'checkmate'){
@@ -87,23 +99,16 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
                     setIsGameCheckMate(true)
                     setCheckMateMessage(data?.message)
                     setwarning_msgtoshow(data?.message)
-                    if(data?.message.include('White')){
+
+                    if(data?.message.includes('White')){
                         // probabaly player 1 aka white win - updating stats based on this
                         if(userData.id === gamematchdata?.player_1){
-                            // this will update the game stats 
                             handleFunctionToUpdateGameStatsAfterCheckMate(userData.id)
-                            handleFunctiontoUpdate_Winner_UserStatsAfterCheckMate(userData.id)
-                        } else  {
-                            handleFunctiontoUpdate_Looser_UserStatsAfterCheckMate(userData.id)
                         }
                     } else {
                         // probabaly player 2 aka Black win - updating stats based on this
                         if(userData.id === gamematchdata?.player_2){
-                            // this will update the game stats 
                             handleFunctionToUpdateGameStatsAfterCheckMate(userData.id)
-                            handleFunctiontoUpdate_Winner_UserStatsAfterCheckMate(userData.id)
-                        } else  {
-                            handleFunctiontoUpdate_Looser_UserStatsAfterCheckMate(userData.id)
                         }
                     }
                 } else {
@@ -115,19 +120,20 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
                         setwarning_msgtoshow(data?.message)
                     }
                 }
-            } else if (data.action == 'last-message') {
-                console.log(`msg: ${data.message}`)
+            } else if (data.action === 'last-message') {
+                // console.log(`msg: ${data.message}`)
+                setLastMessages((prevmessage:any) => [...prevmessage, data.message])
             }
-        };
+        };      
 
 
         socketInstace.onclose = () => {
             console.log('socket disconnected')
             // Notify the server that the user is offline
-            socketInstace.send(JSON.stringify({
-                action: 'online-status',
-                online: 'offline',
-            }));
+            // socketInstace.send(JSON.stringify({
+            //     action: 'online-status',
+            //     online: 'offline',
+            // }));
         }
 
         setSocket(socketInstace);
@@ -159,7 +165,7 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
 
     // player passing last message 
     function passingLastMessagetoEachOther(message:string){
-        if(socket || typeof userData != undefined || userData){
+        if(socket && message.trim() || typeof userData != undefined || userData){
             // step 1 - > show this move to the people of the group
             console.log('message',message)
 
@@ -173,6 +179,8 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
     // updating the game states after checkmate 
     async function handleFunctionToUpdateGameStatsAfterCheckMate(userid:number){
        try {
+        console.log('Calling to update the game state')
+
         const res = await fetch(`${ApiUrl}/g/updatestats_aftercheckmate/`,{
             method : 'POST',
             headers : {
@@ -199,65 +207,7 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
        }
     }
 
-    // updating the winner user stats after winning 
-    async function handleFunctiontoUpdate_Winner_UserStatsAfterCheckMate(userid:number){
-        try {
-            const res = await fetch(`${ApiUrl}/u/update_winner_statsaftercheckmate/`,{
-                method : 'POST',
-                headers : {
-                    'Content-Type' : 'application/json'
-                },
-                body : JSON.stringify({ userid:userid })
-            })
     
-            if(!res.ok){
-                console.log(await res.text())
-                return;
-            }
-    
-            const data = await res.json()
-            if(!data){
-                console.log('Issue While Converting into json')
-                return;
-            }
-    
-            console.log(data?.message)
-       } catch (error) {
-            console.log(`Failed to Update Winner User state after winning...: ${error}`)
-            return;
-       }
-    }
-
-    // updating the losser user stats after loosing 
-    async function handleFunctiontoUpdate_Looser_UserStatsAfterCheckMate(userid:number){
-        try {
-            const res = await fetch(`${ApiUrl}/u/update_looser_statsaftercheckmate/`,{
-                method : 'POST',
-                headers : {
-                    'Content-Type' : 'application/json'
-                },
-                body : JSON.stringify({ userid:userid })
-            })
-    
-            if(!res.ok){
-                console.log(await res.text())
-                return;
-            }
-    
-            const data = await res.json()
-            if(!data){
-                console.log('Issue While Converting into json')
-                return;
-            }
-    
-            console.log(data?.message)
-        } catch (error) {
-            console.log(`Failed to Update Looser User state after winning...: ${error}`)
-            return;
-        }
-    }
-
-
     function getMoveOptions(square : Square) {
         const moves = game.moves({
             square,
@@ -404,16 +354,16 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
                 <div className='flex flex-col gap-[3px] items-start'>
                     <p className='px-6 text-white font-manrope text-xs'>player_2 
                         <span className='text-center text-xs'>
-                            {gamematchdata?.player_2 == userData?.id && playerTurn == 'Black' ? ' - your turn' : ''}
+                            {gamematchdata?.player_2 == userData?.id && playerTurn == 'Black' ? ' - your turn' : '- opponent turn'}
                         </span>
                     </p>
                     <div className="z-50 flex items-center px-6">
                         <Chessboard 
                             id="ClickToMove" 
-                            animationDuration={200} 
+                            animationDuration={100} 
                             arePiecesDraggable={false} 
                             position={gameFenStringFromBackend} 
-                            onSquareClick={onSquareClick} 
+                            onSquareClick={isPlayerTurn ? onSquareClick : () => {}}
                             onPromotionPieceSelect={onPromotionPieceSelect} 
                             boardWidth={500}
                             customBoardStyle={{
@@ -431,7 +381,7 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
                     </div>
                     <p className='px-6 text-white font-manrope text-xs'>player_1 
                         <span className='text-xs'>
-                            {gamematchdata?.player_1 == userData?.id && playerTurn == 'White' ? ' - your turn' : ''}
+                            {gamematchdata?.player_1 == userData?.id && playerTurn == 'White' ? ' - your turn' : '-opponent turn'}
                         </span>
                     </p>
                 </div>
@@ -470,7 +420,13 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
                                     </button>
                                 </div>
                                 <div className='bg-gray-50 p-4 rounded-xs max-h-32 overflow-y-auto'>
-                                    <p className='text-gray-600 text-sm'>No messages yet</p>
+                                    <div className='flex flex-col items-center gap-2'>
+                                        {
+                                            lastMessages != undefined && lastMessages.map((msg:string, index:number) => (
+                                                <p className='text-gray-600 text-sm' key={index}>{msg}</p>
+                                            ))
+                                        }
+                                    </div>
                                 </div>
                             </div>
                         </div>

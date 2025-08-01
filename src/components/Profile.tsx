@@ -170,7 +170,7 @@ export default function Profile() {
           (
             <div>
               <div className='pt-[53px] grid grid-cols-2'>
-                <div className='col-start-1 py-3 px-6 col-end-2 flex flex-col gap-3 text-sm font-manrope font-semibold'>
+                <div className='col-start-1 py-3 px-6 col-end-2 flex flex-col gap-2 text-sm font-manrope font-semibold'>
                   <p>Name: {userData.username}</p>
                   <p className='text-xs opacity-55 flex gap-1 items-center'>
                     <span><CgMail className='size-3' /></span>
@@ -179,6 +179,9 @@ export default function Profile() {
                   <p className='opacity-50 text-xs flex gap-1 items-center'>
                     {/* <span><BsTwitterX className='size-3' /></span> */}
                     <span>Rank : 0</span>
+                  </p>
+                  <p className='opacity-50 text-xs flex gap-1 items-center'>
+                    <span>Total point : {userData?.total_points}</span>
                   </p>
                 </div>
                 <div className='col-start-2 col-end-3'>
@@ -202,14 +205,20 @@ export default function Profile() {
                     recentGameOftheUser.map((data:RecentgameData,idx) => (
                         <div className='grid grid-cols-6 items-center gap-[1px] py-1' key={idx}>
                           <p className='text-center text-zinc-700 py-1 font-manrope font-semibold text-xs'>{idx}</p>
-                          <p className={`text-center text-zinc-700 py-1 font-manrope font-semibold text-xs `}>
-                            <span className={`${data?.game_status == 'pending' || data?.game_status == 'in_proggess' ? 'bg-zinc-700 inline-block px-6 text-white py-1 rounded-3xl text-[10px]' : 'bg-green-400 inline-block px-6 text-white rounded-3xl text-[10px]' }`}>
+                          <p className={`text-center text-zinc-700 py-1 font-manrope text-xs `}>
+                            <span className={`${data?.game_status == 'pending' || data?.game_status == 'in_proggess' ? 'bg-zinc-700 inline-block px-6 text-white py-2 rounded-3xl text-[10px]' : 'bg-emerald-400 inline-block px-6 text-white rounded-3xl text-[10px]' }`}>
                               {data?.game_status}
                             </span>
                           </p>
                           <p className='text-center text-zinc-700 py-1 font-manrope font-semibold text-[11px]'>{data?.player_2_status}</p>
                           <p className='text-center text-zinc-700 py-1 font-manrope font-semibold text-xs'>{data?.game_draw ? data?.game_draw : '-'}</p>
-                          <p className='text-center text-zinc-700 py-1 font-manrope font-semibold text-xs'>{data?.winner ? data?.winner : 'null'}</p>
+                          <p className='text-center text-zinc-700 py-1 font-manrope font-semibold text-xs'>
+                            {
+                              data?.winner ?
+                              data.winner == userData.id.toString() ? `${data.winner} - aka (you)` : `${data.winner}-${userData.username}`  
+                              : 'null'
+                            }
+                          </p>
                           <p className='text-center text-zinc-700 py-1 font-manrope font-semibold text-xs cursor-pointer'>
                             <span className={`${data?.game_status == 'completed' ? '' : 'bg-lime-500 py-1 inline-block px-6 font-manrope text-zinc-800 rounded-3xl text-[11px]' }`} 
                               onClick={() => {
