@@ -1,14 +1,16 @@
 import { CgMail } from 'react-icons/cg'
 import profileheader from '../assets/profileheader.avif'
 import profile from '../assets/scroll3.jpg'
-// import { BsTwitterX } from 'react-icons/bs'
 import FaqCard from './FaqCard'
 import { HiOutlineEmojiSad } from 'react-icons/hi'
-import { UserDataType } from '../types/types'
+import { UserDataType,GameMatchtype } from '../types/types'
 import { useEffect, useState } from 'react'
 import { useAuth } from '../context/useContext'
 import { FcPrevious } from 'react-icons/fc'
 import { useNavigate } from 'react-router'
+import { TbCancel } from 'react-icons/tb'
+import { FiLoader } from 'react-icons/fi'
+
 
 const userfieldOptions = [
   {
@@ -56,6 +58,10 @@ export default function Profile() {
   const [userData,setUserData] = useState<UserDataType>()
   const [loading,setloading] = useState(false)
   const [recentGameOftheUser,setRecentGameOftheUser] = useState<RecentgameData[]>()
+  const [fetchGameDatatoShowGameField,setfetchGameDatatoShowGameField] = useState<GameMatchtype>()
+  const [gameDataLoading,setGameDataLoading] = useState(false)
+  const [whentoShowGameData,SetWhenToShowGameData] = useState(false)
+
   const { token } = useAuth()
   const navigate = useNavigate()
   if(!token || token == null){
@@ -125,7 +131,7 @@ export default function Profile() {
   fetchRecent_two_game()
   },[token])
 
-  const userStatsCardData= [
+  const userStatsCardData= [ 
     {
       label1:'No of Games played',
       label2: userData?.total_game_played ? userData.total_game_played.toString() : '0'
@@ -144,14 +150,47 @@ export default function Profile() {
     }
   ]
 
+  const fetchGamedata = async(gameid:string) => {
+    try {
+      SetWhenToShowGameData(true)
+      setGameDataLoading(true)
+
+      const res = await fetch(`${ApiUrl}/g/game_instance/`,{
+        method : 'POST',
+        headers :{
+          'Content-Type' : 'application/json'
+        },
+        body : JSON.stringify({game_id:gameid})
+      })
+
+      if(!res.ok){
+        console.error(await res.text())
+        return;
+      }
+
+      const data = await res.json()
+
+      if(!data){
+        console.error('Issue Occured while converting it into Json.')
+        return;
+      }
+
+      setfetchGameDatatoShowGameField(data?.data)
+    } catch (error) {
+      console.error(`Issue Occured while fetching game data: ${error}`)
+    } finally {
+      setGameDataLoading(false)
+    }
+  }
+
   return (
-    <div className="px-52 min-h-screen bg-gradient-to-b from-white via-violet-200 to-white">
+    <div className={`px-52 min-h-screen bg-gradient-to-b ${whentoShowGameData ? 'brightness-75 ' : ''} from-white via-violet-200 to-white`}>
       <img src={profileheader} alt="profile image" className='w-full relative object-cover max-h-40 ' />
       <p className='absolute top-3 text-xs cursor-pointer font-manrope rounded-md font-semibold flex flex-row gap-2 items-center px-4 py-1 bg-violet-300 left-60' onClick={() => navigate('/dashboard')}>
         <span><FcPrevious className='size-3' /></span>
         <span>back</span>
       </p>
-      <div>
+      <div>  
         {
           userData != undefined ?
           <p className='size-24 object-cover absolute top-28 rounded-full shadow bg-zinc-700 pt-6 font-manrope text-white text-4xl  text-center shadow-violet-200 border left-[220px]'>{userData.username.toString().substring(0,1).toUpperCase()}</p>
@@ -220,17 +259,11 @@ export default function Profile() {
                             }
                           </p>
                           <p className='text-center text-zinc-700 py-1 font-manrope font-semibold text-xs cursor-pointer'>
-                            <span className={`${data?.game_status == 'completed' ? '' : 'bg-lime-500 py-1 inline-block px-6 font-manrope text-zinc-800 rounded-3xl text-[11px]' }`} 
-                              onClick={() => {
-                                if(data?.game_status == 'completed'){
-                                  console.log('Game is completed')
-                                } else {
-                                  navigate(`/challenge/u/${data?.game_id}/`)
-                                }
-                              }}
-                            >
+                            {/* <span className={`${data?.game_status == 'completed' ? '' : 'bg-zinc-600 py-1 inline-block px-6 font-manrope text-zinc-800 rounded-3xl text-[11px]' } text-emerald-500`} 
+                            > */}
+                            <span className='bg-zinc-600 py-[3px] inline-block px-3 font-manrope text-emerald-300 rounded-sm text-[11px]' onClick={() => fetchGamedata(data?.game_id)}>
                               {
-                                data?.game_status == 'completed' ? '' : 'view'
+                                data?.game_status == 'completed' ? 'view' : 'view'
                               }
                             </span>
                           </p>
@@ -253,6 +286,56 @@ export default function Profile() {
             </div>
           )
         )
+      }
+
+      {
+        whentoShowGameData && 
+        <div className='absolute top-0 flex flex-col items-center min-h-screen justify-center left-[29rem]'>
+          <div className='bg-zinc-700 text-white text-xs py-4 px-6 w-80 h-80 rounded-md font-manrope'>
+            <div className='flex flex-col gap-6'>
+              <div className='flex flex-row items-center justify-between w-auto'>
+                <p></p>
+                <p className='text-center'>Game stats:</p>
+                <TbCancel className='size-7 px-2 py-1 cursor-pointer rounded-md hover:bg-emerald-400 ' onClick={() => SetWhenToShowGameData(false)} />
+              </div>
+                {
+                  gameDataLoading ?
+                  <div className='flex flex-col items-center justify-center min-h-40 '>
+                    <FiLoader className='size-4 animate-spin' />
+                  </div>
+                  :
+                  (
+                    fetchGameDatatoShowGameField != undefined ?
+                    <div className='flex flex-col gap-3 px-2'>
+                      <p className='text-wrap'>game id :
+                        <span className='text-emerald-300 text-wrap'>{fetchGameDatatoShowGameField?.game_id}</span>
+                      </p>
+                      <p className='text-wrap'>player_1 :
+                        <span className='text-emerald-300 text-wrap'>{fetchGameDatatoShowGameField?.player_1 == userData?.id ? userData?.username : fetchGameDatatoShowGameField.player_1}</span>
+                      </p>
+                      <p className='text-wrap'>player_2 :
+                        <span className='text-emerald-300 text-wrap'>{fetchGameDatatoShowGameField?.player_2 == userData?.id ? userData?.username : fetchGameDatatoShowGameField.player_2}</span>
+                      </p>
+                      <p className='text-wrap'>Winner :
+                        <span className='text-emerald-300 text-wrap'>{fetchGameDatatoShowGameField?.winner == userData?.id ? userData?.username : fetchGameDatatoShowGameField.winner}</span>
+                      </p>
+                      <p className='text-wrap'>Moves[] :
+                        {
+                          fetchGameDatatoShowGameField?.moves.map((data:string,idx:number) => (
+                            <span className='text-emerald-300 text-wrap' key={idx}>{data}</span>
+                          ))
+                        }
+                      </p>
+                  </div>
+                    :
+                    <div className='flex flex-col items-center justify-center min-h-40 '>
+                      <p>Game Field is Undefined!</p>
+                    </div>
+                  )
+                }
+            </div>
+          </div> 
+        </div>
       }
     </div>
   )

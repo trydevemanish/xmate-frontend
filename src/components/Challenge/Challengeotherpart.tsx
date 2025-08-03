@@ -20,12 +20,14 @@ type props = {
 
 function Challengeotherpart({playerTurn,warning_msgtoshow,moveMadeFromtoTheDestination,playerStatus,userData,gamematchdata}:props) { 
   const [gameMatchMoves,setGameMatchMoves] = useState<string[]>(gamematchdata?.moves || [])
+  
   useEffect(() => {
     if(moveMadeFromtoTheDestination.trim()){
+      console.log('Move made from the other part',moveMadeFromtoTheDestination)
       // add this new coming move to the game match moves with the previous messages .
       setGameMatchMoves((prevdata) => [...prevdata,moveMadeFromtoTheDestination])
     }
-  },[gameMatchMoves])
+  },[moveMadeFromtoTheDestination])
 
   return (
     <div className='pt-5'>

@@ -25,6 +25,7 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
     const [rightClickedSquares, setRightClickedSquares] = useState({} as CustomSquareStyles);
     const [moveSquares] = useState({});
     const [optionSquares, setOptionSquares] = useState({});
+
     // websocket related states
     const [socket,setSocket] = useState<WebSocket>()
     const [playerStatus, setPlayerStatus] = useState({
@@ -43,11 +44,17 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
     const [isGameCheckMate,setIsGameCheckMate] = useState(false)
     const [checkMateMessage,setCheckMateMessage] = useState('')
     const [isPlayerTurn, setIsPlayerTurn] = useState<boolean>(false);
-    
+
+    useEffect(() => {
+        if (gameFenStringFromBackend) {
+            const newGame = new Chess(gameFenStringFromBackend);
+            setGame(newGame);
+        }
+    }, [gameFenStringFromBackend]);
 
     useEffect(() => {
 
-        if (!gameid || !userData) {
+        if (!gameid || !userData || !gamematchdata) {
             console.log('Game id and userData is null')
             return ;
         }
@@ -57,88 +64,86 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
             return;
         }
 
-        // const socketInstace = new WebSocket(`ws://127.0.0.1:8000/ws/game/${gameid}/?user=${userData.username}`)
-        const socketInstace = new WebSocket(`ws://127.0.0.1:8000/ws/game/${gameid}/?user=${userData.username}&user_id=${userData.id}`)
+        try {
 
-        socketInstace.onopen = () => {
-            console.log('Socket Connected')
+            const socketInstace = new WebSocket(`ws://127.0.0.1:8000/ws/game/${gameid}/?user=${userData.username}&user_id=${userData.id}`)
+            socketInstace.onopen = () => {
+                console.log('Socket Connected')
+            }
 
-            // socketInstace.send(JSON.stringify({
-            //     action: 'online-status',
-            //     online: 'online'
-            // }))
-        }
+            socketInstace.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.action === 'update-player-status') {
+                    console.log(`player status : ${data.player_status}`);
+                    setPlayerStatus(data?.player_status)
 
-        socketInstace.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.action === 'update-player-status') {
-                console.log(`player status : ${data.status}`);
-                setPlayerStatus(data?.player_status)
+                } else if (data.action === 'make-move'){
+                    // console.log(`Fen string from backend: ${data.fen} and the turn: ${data.turn}`)
+                    setGameFenStringFromBackend(data.fen)
+                    setPlayerTurn(data.turn)
+                    setMoveMadeFromtoTheDestination(data?.move)
+                    console.log('Move from the websocket',data?.move)
 
-                // if(gamematchdata?.player_1 == userData.id && data.user == userData.username ){
-                //     setPlayerStatus((prev) => ({ ...prev, player1: data.status }));
-                // } else if (gamematchdata?.player_2 == userData.id && data.user == userData.username){
-                //     setPlayerStatus((prev) => ({ ...prev, player2: data.status }));
-                // }
+                    if(gamematchdata?.player_1 == userData.id){ // on player 1 machine ( white turn )
+                        if(data?.turn == 'White'){
+                            setIsPlayerTurn(true)
+                        } else {
+                            setIsPlayerTurn(false)
+                        }
+                    } else { // on player 2 machine ( Black turn )
+                        if(data?.turn == 'Black'){
+                            setIsPlayerTurn(true)
+                        } else {
+                            setIsPlayerTurn(false)
+                        }
+                    }
 
-            } else if (data.action === 'make-move'){
-                // console.log(`Fen string from backend: ${data.fen} and the turn: ${data.turn}`)
-                setGameFenStringFromBackend(data.fen)
-                setPlayerTurn(data.turn)
+                } else if (data.action === 'game-event'){
+                    console.log(`message from the backend check for : ${data.event} && message: ${data?.message} in game-event action`)
+                    if (data.event == 'checkmate'){
+                        //game stop and show a message that the player won and made some changes to update the user,leaderboard,game model feilds
+                        setIsGameCheckMate(true)
+                        setCheckMateMessage(data?.message)
+                        setwarning_msgtoshow(data?.message)
 
-                if(gamematchdata?.player_1 == userData.id){ // on player 1 machine ( white turn )
-                    setIsPlayerTurn(data.turn === 'White')
-                } else { // on player 2 machine ( Black turn )
-                    setIsPlayerTurn(data.turn === 'Black')
-                }
-
-            } else if (data.action === 'game-event'){
-                console.log(`message from the backend check for : ${data.event} && message: ${data?.message} in game-event action`)
-                if (data.event == 'checkmate'){
-                    //game stop and show a message that the player won and made some changes to update the user,leaderboard,game model feilds
-                    setIsGameCheckMate(true)
-                    setCheckMateMessage(data?.message)
-                    setwarning_msgtoshow(data?.message)
-
-                    if(data?.message.includes('White')){
-                        // probabaly player 1 aka white win - updating stats based on this
-                        if(userData.id === gamematchdata?.player_1){
-                            handleFunctionToUpdateGameStatsAfterCheckMate(userData.id)
+                        if(data?.message.includes('White')){
+                            // probabaly player 1 aka white win - updating stats based on this
+                            if(userData.id === gamematchdata?.player_1){
+                                handleFunctionToUpdateGameStatsAfterCheckMate(userData.id)
+                            }
+                        } else {
+                            // probabaly player 2 aka Black win - updating stats based on this
+                            if(userData.id === gamematchdata?.player_2){
+                                handleFunctionToUpdateGameStatsAfterCheckMate(userData.id)
+                            }
                         }
                     } else {
-                        // probabaly player 2 aka Black win - updating stats based on this
-                        if(userData.id === gamematchdata?.player_2){
-                            handleFunctionToUpdateGameStatsAfterCheckMate(userData.id)
+                        if(data.event == 'move_not_legal') {
+                            setwarning_msgtoshow(data?.message)
+                        } else if (data.event == 'check'){
+                            setwarning_msgtoshow(data ?.message)
+                        } else if (data.event == 'stalemate'){
+                            setwarning_msgtoshow(data?.message)
                         }
                     }
-                } else {
-                    if(data.event == 'move_not_legal') {
-                        setwarning_msgtoshow(data?.message)
-                    } else if (data.event == 'check'){
-                        setwarning_msgtoshow(data ?.message)
-                    } else if (data.event == 'stalemate'){
-                        setwarning_msgtoshow(data?.message)
-                    }
+                } else if (data.action === 'last-message') {
+                    // console.log(`msg: ${data.message}`)
+                    setLastMessages((prevmessage:any) => [...prevmessage, data.message])
                 }
-            } else if (data.action === 'last-message') {
-                // console.log(`msg: ${data.message}`)
-                setLastMessages((prevmessage:any) => [...prevmessage, data.message])
+            };      
+
+
+            socketInstace.onclose = () => {
+                console.log('socket disconnected')
             }
-        };      
 
+            setSocket(socketInstace);
 
-        socketInstace.onclose = () => {
-            console.log('socket disconnected')
-            // Notify the server that the user is offline
-            // socketInstace.send(JSON.stringify({
-            //     action: 'online-status',
-            //     online: 'offline',
-            // }));
+            return () => socketInstace.close()
+            
+        } catch (error) {
+            console.log('Issue Occured while connectinf to the socket',error)
         }
-
-        setSocket(socketInstace);
-
-        return () => socketInstace.close()
 
     },[gameid, userData, gamematchdata])
 
@@ -209,56 +214,47 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
 
     
     function getMoveOptions(square : Square) {
+    
+        // Ensure the clicked square contains a piece controlled by the current player
+        // const piece = game.get(square);
+        // if (!piece) {
+        //     setOptionSquares({});
+        //     return false;
+        // }
+
         const moves = game.moves({
             square,
             verbose: true
         });
 
         if (moves.length === 0) {
-        setOptionSquares({});
-        return false;
+            setOptionSquares({});
+            return false;
         }
 
         if(game.isStalemate()){
-        toast.info('Choose diffrenet move.')
-        }
-
-        if(game.isGameOver()){
-        toast.info('Game over')
-        }
-
-        if(game.isDraw()){
-        toast.info('Game draw')
-        }
-
-        if(game.inCheck()){
-        toast.info('In check')
-        }
-
-        if(game.isCheckmate()){
-            toast.info('Checkmate')
-            return;
+            toast.info('Choose diffrenet move.')
         }
 
         const newSquares : SquareStyles = {};
 
         moves.map((move:Move) => {
 
-        const pieceAtTo = game.get(move.to);
-        const pieceAtFrom = game.get(square);
+            const pieceAtTo = game.get(move.to);
+            const pieceAtFrom = game.get(square);
 
-        newSquares[move.to] = {
-            background: pieceAtTo && pieceAtFrom && pieceAtTo.color !== pieceAtFrom.color ? "radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)" : "radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)",
-            borderRadius: "50%"
-        }
+            newSquares[move.to] = {
+                background: pieceAtTo && pieceAtFrom && pieceAtTo.color !== pieceAtFrom.color ? "radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)" : "radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)",
+                borderRadius: "50%"
+            }
 
-        // console.log('Move',move.from, move.to)
+            // console.log('Move',move.from, move.to)
 
-        return move;
+            return move;
         })
 
         newSquares[square] = {
-        background: "rgba(255, 255, 0, 0.4)"
+            background: "rgba(255, 255, 0, 0.4)"
         };
 
         setOptionSquares(newSquares);
@@ -267,10 +263,17 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
     }
 
     function onSquareClick(square:Square) {
+
+        if (!isPlayerTurn) {
+            console.log("It's not your turn!");
+            return;
+        }
+
         setRightClickedSquares({});
 
         if (!moveFrom) {
             const hasMoveOptions = getMoveOptions(square);
+            console.log('hasMoveOptions',hasMoveOptions)
             if (hasMoveOptions) setMoveFrom(square);
             return;
         }
@@ -310,11 +313,8 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
                 return;
             }
 
-            // console.log('moves checking',`${move.from}${move.to}`)
-            console.log('calling the function after making the move')
+            console.log('calling the function after making the move to send it to websocket')
             playerMakingMove(`${move.from}${move.to}`)
-            // playerMakingMove(move)
-            setMoveMadeFromtoTheDestination(`${move.from}-${move.to}`)
 
             setGame(gameCopy);
             setMoveFrom("");
@@ -364,6 +364,7 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
                             arePiecesDraggable={false} 
                             position={gameFenStringFromBackend} 
                             onSquareClick={isPlayerTurn ? onSquareClick : () => {}}
+                            // onSquareClick={onSquareClick}
                             onPromotionPieceSelect={onPromotionPieceSelect} 
                             boardWidth={500}
                             customBoardStyle={{
