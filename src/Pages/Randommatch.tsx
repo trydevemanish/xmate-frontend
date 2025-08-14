@@ -1,55 +1,105 @@
-import { Chess, Piece, Square } from 'chess.js';
-import React, { SetStateAction, useState } from 'react'
+import { Chess} from 'chess.js';
+import { useRef, useState } from 'react'
 import { Chessboard } from 'react-chessboard';
+import { Square } from 'react-chessboard/dist/chessboard/types';
 
 export default function Randommatch() {
-    const [game, setGame] = useState(new Chess());
-    const [currentTimeout, setCurrentTimeout] = useState<SetStateAction<number>>();
+    const chessGameRef = useRef(new Chess());
+    const chessGame = chessGameRef.current;
 
-    function safeGameMutate(modify: ({}: any) => void) {
-      setGame((g : any) => {
-        const update = {
-          ...g
-        };
-        modify(update);
-        return update;
-      });
-    }
+    const [chessPosition, setChessPosition] = useState(chessGame.fen());
+    const [moveFrom, setMoveFrom] = useState('');
+    const [optionSquares, setOptionSquares] = useState({});
+
     function makeRandomMove() {
-        const possibleMoves = game.moves();
-    
-        // exit if the game is over
-        if (game.isGameOver() || game.isDraw() || possibleMoves.length === 0) return;
-        const randomIndex = Math.floor(Math.random() * possibleMoves.length);
-        safeGameMutate(game => {
-          game.move(possibleMoves[randomIndex]);
-        });
+      const possibleMoves = chessGame.moves();
+
+      if (chessGame.isGameOver()) {
+        return;
       }
-      function onDrop(sourceSquare : Square, targetSquare:Square, piece:any) {
-        const gameCopy : any = {
-          ...game
+      const randomMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+      chessGame.move(randomMove);
+      setChessPosition(chessGame.fen());
+    }
+
+    function getMoveOptions(square: Square) {
+      const moves = chessGame.moves({
+        square,
+        verbose: true
+      });
+
+      if (moves.length === 0) {
+        setOptionSquares({});
+        return false;
+      }
+
+      const newSquares: Record<string, React.CSSProperties> = {};
+
+      for (const move of moves) {
+        newSquares[move.to] = {
+          background: chessGame.get(move.to) && chessGame.get(move.to)?.color !== chessGame.get(square)?.color ? 'radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)' // larger circle for capturing
+          : 'radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)',
+          borderRadius: '50%'
         };
-        const move = gameCopy.move({
-          from: sourceSquare,
-          to: targetSquare,
-          promotion: piece[1].toLowerCase() ?? "q"
-        });
-        setGame(gameCopy);
-    
-        // illegal move
-        if (move === null) return false;
-    
-        // store timeout so it can be cleared on undo/reset so computer doesn't execute move
-        const newTimeout = setTimeout(makeRandomMove, 200);
-        setCurrentTimeout(newTimeout);
-        return true;
       }
+
+      newSquares[square] = {
+        background: 'rgba(255, 255, 0, 0.4)'
+      };
+      setOptionSquares(newSquares);
+      return true;
+    }
+
+    function onSquareClick(square: Square, piece?: string) {
+      if (!moveFrom && piece) {
+        const hasMoveOptions = getMoveOptions(square);
+
+        if (hasMoveOptions) {
+          setMoveFrom(square);
+        }
+
+        return;
+      }
+
+      const moves = chessGame.moves({
+        square: moveFrom as Square,
+        verbose: true
+      });
+      const foundMove = moves.find(m => m.from === moveFrom && m.to === square);
+
+      if (!foundMove) {
+        const hasMoveOptions = getMoveOptions(square);
+        setMoveFrom(hasMoveOptions ? square : '');
+        return;
+      }
+
+      try {
+        chessGame.move({
+          from: moveFrom,
+          to: square,
+          promotion: 'q'
+        });
+      } catch {
+        const hasMoveOptions = getMoveOptions(square);
+        if (hasMoveOptions) {
+          setMoveFrom(square);
+        }
+        return;
+      }
+
+      setChessPosition(chessGame.fen());
+      setTimeout(makeRandomMove, 300);
+      setMoveFrom('');
+      setOptionSquares({});
+    }
+    
+    
   return (
     <div>
-      <Chessboard id="PlayVsRandom" position={game.fen()} boardWidth={500} onPieceDrop={onDrop} customBoardStyle={{
-        borderRadius: "4px",
-        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)"
-        }} />
+      <Chessboard id={'click-to-move'} arePiecesDraggable={false} customSquareStyles={optionSquares} onSquareClick={onSquareClick}  boardWidth={500} position={chessPosition}
+      customLightSquareStyle={{ backgroundColor: "#eeeed2" }}
+      customDarkSquareStyle={{ backgroundColor: "#769656" }}
+      />
     </div>
   )
 }
