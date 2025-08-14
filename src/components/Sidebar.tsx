@@ -2,6 +2,7 @@ import React,{useState} from 'react'
 import { Link } from 'react-router'
 import { BiUserCircle } from 'react-icons/bi'
 import { useAuth } from '../context/useContext'
+import { CgCloseR } from 'react-icons/cg'
 
 const Sidebarmenuoptions = [
   {
@@ -22,7 +23,12 @@ type Sidebarmenuoptiontype = {
   menu : string
 }
 
-export default function Sidebar({setClickedMenu}:{setClickedMenu : React.Dispatch<React.SetStateAction<string>>}) {
+type props = {
+  setClickedMenu : React.Dispatch<React.SetStateAction<string>>,
+  closeSidebar : () => void
+}
+
+export default function Sidebar({setClickedMenu,closeSidebar}:props) {
   const [selectedoption,setSelectedOption] = useState(null)
   const { logoutUser } = useAuth()
   
@@ -30,6 +36,10 @@ export default function Sidebar({setClickedMenu}:{setClickedMenu : React.Dispatc
   return (
       <div className='flex flex-col px-2 py-2 justify-between min-h-screen'>
         <div className='flex flex-col gap-1 font-manrope text-sm'>
+          <div className='px-2 flex flex-row items-center justify-between text-xs text-start py-1 md:invisible md:hidden'>
+            <p className='text-violet-400'>xmate!</p>
+            <CgCloseR className='size-4 rounded-sm cursor-pointer stroke-black' onClick={closeSidebar} />
+          </div>
           {Sidebarmenuoptions.map((data:Sidebarmenuoptiontype,idx:any) => (
             <p 
               key={idx} 
