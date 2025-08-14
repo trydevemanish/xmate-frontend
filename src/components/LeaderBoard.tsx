@@ -50,7 +50,8 @@ export default function LeaderBoard() {
                 })
 
                 if(!res.ok){
-                    console.error('Failed to get the response',await res.text())
+                    const errText = await res.json()
+                    console.error(errText?.message)
                     return
                 }
                 

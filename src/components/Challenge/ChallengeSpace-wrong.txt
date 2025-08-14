@@ -1,10 +1,15 @@
-import { Chess, Move } from 'chess.js';
-import { toast } from "react-toastify";
+import React from 'react'
 import { Chessboard } from "react-chessboard";
-import { useEffect,useRef,useState } from 'react'
-import Challengeotherpart from './Challengeotherpart';
-import { UserDataType,GameMatchtype } from '../../types/types'
+import { useState,useEffect } from "react";
+import { Chess, Move } from 'chess.js';
 import { CustomSquareStyles, Square } from 'react-chessboard/dist/chessboard/types';
+import { toast } from "react-toastify";
+import { UserDataType,GameMatchtype } from '../../types/types'
+import Challengeotherpart from './Challengeotherpart';
+
+type SquareStyles = {
+  [key in Square]?: React.CSSProperties;
+};
 
 type props = {
     gameid : string | undefined;
@@ -12,12 +17,7 @@ type props = {
     gamematchdata:GameMatchtype | undefined;
 }
 
-type SquareStyles = {
-  [key in Square]?: React.CSSProperties;
-};
-
 export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
-    const hasConnectedRef = useRef(false);
     const [game, setGame] = useState(new Chess());
     const [moveFrom, setMoveFrom] = useState<Square | "">("");
     const [moveTo, setMoveTo] = useState<Square | null>(null);
@@ -52,100 +52,123 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
         }
     }, [gameFenStringFromBackend]);
 
+    const shouldConnectWebSocket =
+        navigator.onLine &&
+        gameid &&
+        userData != undefined &&
+        gamematchdata != undefined
+        
+
     useEffect(() => {
 
-        if(!gameid || !userData || !gamematchdata || hasConnectedRef.current){
-            console.log('Both Value are undefined')
+        if (!shouldConnectWebSocket) return;
+
+        if(typeof gamematchdata == undefined || typeof userData == undefined){
+            console.log('Both user and Game data')
             return
         }
 
-        hasConnectedRef.current = true;
-
-        const socketInstance = new WebSocket(`ws://127.0.0.1:8000/ws/game/${gameid}/?user=${userData.username}&user_id=${userData.id}`)
-
-        socketInstance.onopen = () => {
-            console.log('Socket Connected')
+        if(gamematchdata.player_2_status != 'Player_2_Joined'){
+            return;
         }
 
-        socketInstance.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.action === 'update-player-status') {
-                setPlayerStatus(data?.player_status)
+        if(gamematchdata.game_status == 'completed'){
+            return;
+        }
 
-                
-            } else if (data.action === 'make-move'){
-                // console.log(`Fen string from backend: ${data.fen} and the turn: ${data.turn}`)
-                setGameFenStringFromBackend(data.fen)
-                setPlayerTurn(data.turn)
-                setMoveMadeFromtoTheDestination(data?.move)
+        console.log('No of time component mount gameid',gameid)
 
-                if(gamematchdata?.player_1 == userData.id){ // on player 1 machine ( white turn )
-                    if(data?.turn == 'White'){
-                        setIsPlayerTurn(true)
-                    } else {
-                        setIsPlayerTurn(false)
-                    }
-                } else { // on player 2 machine ( Black turn )
-                    if(data?.turn == 'Black'){
-                        setIsPlayerTurn(true)
-                    } else {
-                        setIsPlayerTurn(false)
-                    }
-                }
+        try {
 
-            } else if (data.action === 'game-event'){
-                console.log(`message from the backend check for : ${data.event} && message: ${data?.message} in game-event action`)
-                if (data.event == 'checkmate'){
-                    //game stop and show a message that the player won and made some changes to update the user,leaderboard,game model feilds
-                    setIsGameCheckMate(true)
-                    setCheckMateMessage(data?.message)
-                    setwarning_msgtoshow(data?.message)
+            const socketInstace = new WebSocket(`ws://127.0.0.1:8000/ws/game/${gameid}/?user=${userData.username}&user_id=${userData.id}`)
+            socketInstace.onopen = () => {
+                console.log('Socket Connected')
+            }
 
-                    if(data?.message.includes('White')){
-                        // probabaly player 1 aka white win - updating stats based on this
-                        if(userData.id === gamematchdata?.player_1){
-                            handleFunctionToUpdateGameStatsAfterCheckMate(userData.id)
+            socketInstace.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.action === 'update-player-status') {
+                    console.log(`player status : ${data.player_status.player1}`);   
+                    console.log(`player status : ${data.player_status.player2}`);   
+                    setPlayerStatus(data?.player_status)
+
+                } else if (data.action === 'make-move'){
+                    // console.log(`Fen string from backend: ${data.fen} and the turn: ${data.turn}`)
+                    setGameFenStringFromBackend(data.fen)
+                    setPlayerTurn(data.turn)
+                    setMoveMadeFromtoTheDestination(data?.move)
+                    console.log('Move from the websocket',data?.move)
+
+                    if(gamematchdata?.player_1 == userData.id){ // on player 1 machine ( white turn )
+                        if(data?.turn == 'White'){
+                            setIsPlayerTurn(true)
+                        } else {
+                            setIsPlayerTurn(false)
                         }
-                    } else {
-                        // probabaly player 2 aka Black win - updating stats based on this
-                        if(userData.id === gamematchdata?.player_2){
-                            handleFunctionToUpdateGameStatsAfterCheckMate(userData.id)
+                    } else { // on player 2 machine ( Black turn )
+                        if(data?.turn == 'Black'){
+                            setIsPlayerTurn(true)
+                        } else {
+                            setIsPlayerTurn(false)
                         }
                     }
-                } else {
-                    if(data.event == 'move_not_legal') {
+
+                } else if (data.action === 'game-event'){
+                    console.log(`message from the backend check for : ${data.event} && message: ${data?.message} in game-event action`)
+                    if (data.event == 'checkmate'){
+                        //game stop and show a message that the player won and made some changes to update the user,leaderboard,game model feilds
+                        setIsGameCheckMate(true)
+                        setCheckMateMessage(data?.message)
                         setwarning_msgtoshow(data?.message)
-                    } else if (data.event == 'check'){
-                        setwarning_msgtoshow(data ?.message)
-                    } else if (data.event == 'stalemate'){
-                        setwarning_msgtoshow(data?.message)
+
+                        if(data?.message.includes('White')){
+                            // probabaly player 1 aka white win - updating stats based on this
+                            if(userData.id === gamematchdata?.player_1){
+                                handleFunctionToUpdateGameStatsAfterCheckMate(userData.id)
+                            }
+                        } else {
+                            // probabaly player 2 aka Black win - updating stats based on this
+                            if(userData.id === gamematchdata?.player_2){
+                                handleFunctionToUpdateGameStatsAfterCheckMate(userData.id)
+                            }
+                        }
+                    } else {
+                        if(data.event == 'move_not_legal') {
+                            setwarning_msgtoshow(data?.message)
+                        } else if (data.event == 'check'){
+                            setwarning_msgtoshow(data ?.message)
+                        } else if (data.event == 'stalemate'){
+                            setwarning_msgtoshow(data?.message)
+                        }
                     }
+                } else if (data.action === 'last-message') {
+                    // console.log(`msg: ${data.message}`)
+                    setLastMessages((prevmessage:any) => [...prevmessage, data.message])
                 }
+            };      
 
-            } else if (data.action === 'last-message') {
-                console.log(`msg: ${data.message}`)
-                setLastMessages((prevmessage:any) => [...prevmessage, data.message])
+            socketInstace.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+
+            socketInstace.onclose = () => {
+                console.log('socket disconnected')
             }
-        }
 
-        socketInstance.onerror = (error) => {
-            console.error('WebSocket error:', error);
-        };
+            setSocket(socketInstace);
 
-        socketInstance.onclose = () => {
-            console.log('socket disconnected')
-        }
-
-        setSocket(socketInstance)
-
-        return () => {
-            if (socketInstance.readyState === WebSocket.OPEN) {
-                socketInstance.close();
+            return () => {
+                if (socketInstace.readyState === WebSocket.OPEN) {
+                    socketInstace.close();
+                }
+                console.log('Socket closed due to component unmount');
             }
+            
+        } catch (error) {
+            console.log('Issue Occured while connectinf to the socket',error)
         }
-    },[gameid,userData,gamematchdata])
 
-
+    },[gameid, userData, gamematchdata,shouldConnectWebSocket])
 
     // player making move 
     function playerMakingMove(move:string){
@@ -156,6 +179,9 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
                 return;
             }
 
+            console.log('move type',typeof move)
+            console.log('move',move)
+
             setwarning_msgtoshow('No message')
 
             socket?.send(JSON.stringify({
@@ -165,12 +191,12 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
         }
     }
 
-
-
     // player passing last message 
     function passingLastMessagetoEachOther(message:string){
         if(socket && message.trim() || typeof userData != undefined || userData){
             // step 1 - > show this move to the people of the group
+            console.log('message',message)
+
             socket?.send(JSON.stringify({
                 action: 'last-message',
                 message: message
@@ -178,10 +204,10 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
         }
     }
 
-
     // updating the game states after checkmate 
     async function handleFunctionToUpdateGameStatsAfterCheckMate(userid:number){
        try {
+        console.log('Calling to update the game state')
 
         const res = await fetch(`${ApiUrl}/g/updatestats_aftercheckmate/`,{
             method : 'POST',
@@ -209,9 +235,16 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
        }
     }
 
-
+    
     function getMoveOptions(square : Square) {
     
+        // Ensure the clicked square contains a piece controlled by the current player
+        // const piece = game.get(square);
+        // if (!piece) {
+        //     setOptionSquares({});
+        //     return false;
+        // }
+
         const moves = game.moves({
             square,
             verbose: true
@@ -251,7 +284,6 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
         return true;
         
     }
-
 
     function onSquareClick(square:Square) {
 
@@ -315,7 +347,6 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
         }
     }
 
-
     function onPromotionPieceSelect(piece:any) {
         if (piece) {
             const gameCopy : any = {
@@ -339,7 +370,6 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
         return true;
     }
 
-
   return (
     <div className={`grid grid-cols-2 min-h-screen bg-zinc-800 relative`}>
         <div className={`col-start-1 ${isGameCheckMate ? 'opacity-50' : '' } col-end-2`}>
@@ -357,6 +387,7 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
                             arePiecesDraggable={false} 
                             position={gameFenStringFromBackend} 
                             onSquareClick={isPlayerTurn ? onSquareClick : () => {}}
+                            // onSquareClick={onSquareClick}
                             onPromotionPieceSelect={onPromotionPieceSelect} 
                             boardWidth={500}
                             customBoardStyle={{
@@ -387,43 +418,43 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
         {
             isGameCheckMate && 
             <div className='absolute flex flex-col items-center min-h-screen justify-center w-full bg-black/30'>
-                <div className='bg-zinc-700 rounded-sm shadow-xl px-8 py-6 font-manrope w-[480px] transform transition-all'>
-                    <div className='space-y-4'>
-                        <div className='text-center space-y-2'>
-                            <h2 className='text-lg font-manrope font-bold text-gray-800'>Game Ended!</h2>
-                            <p className='text-xl font-semibold text-emerald-600'>{checkMateMessage != '' ? checkMateMessage : 'Ruko yr dek rha hai' } 🏆</p>
-                            <p className='text-white text-xs'>All the states will be updated</p>
-                            <div className='bg-emerald-100 text-emerald-800 px-4 py-1  rounded-full text-xs inline-block'>
-                                Game Status: Completed
+                    <div className='bg-zinc-700 rounded-sm shadow-xl px-8 py-6 font-manrope w-[480px] transform transition-all'>
+                        <div className='space-y-4'>
+                            <div className='text-center space-y-2'>
+                                <h2 className='text-lg font-manrope font-bold text-gray-800'>Game Ended!</h2>
+                                <p className='text-xl font-semibold text-emerald-600'>{checkMateMessage != '' ? checkMateMessage : 'Ruko yr dek rha hai' } 🏆</p>
+                                <p className='text-white text-xs'>All the states will be updated</p>
+                                <div className='bg-emerald-100 text-emerald-800 px-4 py-1  rounded-full text-xs inline-block'>
+                                    Game Status: Completed
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div className='mt-9 pt-6 space-y-2'>
-                            <p className='text-white text-xs font-manrope font-medium'>Last Message to each other.</p>
-                            <div className='flex gap-2 text-sm'>
-                                <input 
-                                    type="text" 
-                                    value={inputValue}
-                                    className='flex-1 px-4 border text-xs border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-emerald-500'
-                                    onChange={(e) => setInputValue(e.target.value)}
-                                    placeholder="Type your message..."
-                                />
-                                <button onClick={() => passingLastMessagetoEachOther(inputValue)}  className='px-4 py-[5px] bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors'>
-                                    Send
-                                </button>
-                            </div>
-                            <div className='bg-gray-50 p-4 rounded-xs max-h-32 overflow-y-auto'>
-                                <div className='flex flex-col items-center gap-2'>
-                                    {
-                                        lastMessages != undefined && lastMessages.map((msg:string, index:number) => (
-                                            <p className='text-gray-600 text-sm' key={index}>{msg}</p>
-                                        ))
-                                    }
+                            
+                            <div className='mt-9 pt-6 space-y-2'>
+                                <p className='text-white text-xs font-manrope font-medium'>Last Message to each other.</p>
+                                <div className='flex gap-2 text-sm'>
+                                    <input 
+                                        type="text" 
+                                        value={inputValue}
+                                        className='flex-1 px-4 border text-xs border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-emerald-500'
+                                        onChange={(e) => setInputValue(e.target.value)}
+                                        placeholder="Type your message..."
+                                    />
+                                    <button onClick={() => passingLastMessagetoEachOther(inputValue)}  className='px-4 py-[5px] bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors'>
+                                        Send
+                                    </button>
+                                </div>
+                                <div className='bg-gray-50 p-4 rounded-xs max-h-32 overflow-y-auto'>
+                                    <div className='flex flex-col items-center gap-2'>
+                                        {
+                                            lastMessages != undefined && lastMessages.map((msg:string, index:number) => (
+                                                <p className='text-gray-600 text-sm' key={index}>{msg}</p>
+                                            ))
+                                        }
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
             </div>
         }
     </div>

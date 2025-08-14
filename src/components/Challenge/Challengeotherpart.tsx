@@ -23,9 +23,13 @@ function Challengeotherpart({playerTurn,warning_msgtoshow,moveMadeFromtoTheDesti
   
   useEffect(() => {
     if(moveMadeFromtoTheDestination.trim()){
-      console.log('Move made from the other part',moveMadeFromtoTheDestination)
       // add this new coming move to the game match moves with the previous messages .
-      setGameMatchMoves((prevdata) => [...prevdata,moveMadeFromtoTheDestination])
+      
+      const arrLength = gameMatchMoves.length
+      if(gameMatchMoves[arrLength-1] != moveMadeFromtoTheDestination.trim()){
+        setGameMatchMoves((prevdata) => [...prevdata,moveMadeFromtoTheDestination])
+      }
+      
     }
   },[moveMadeFromtoTheDestination])
 
@@ -77,9 +81,9 @@ function Challengeotherpart({playerTurn,warning_msgtoshow,moveMadeFromtoTheDesti
 
           </div>
 
-          <div className={`flex flex-col bg-zinc-700 py-2 items-center justify-center mt-[2px]`}>
+          <div className={`flex flex-col bg-zinc-700 min-h-40 py-2 items-center justify-center mt-[2px]`}>
             <p className='text-center text-xs text-white'>Message part: </p>
-            <p className='text-center text-xs text-emerald-400'>{warning_msgtoshow}</p>
+            <p className='text-center text-sm text-emerald-400'>{warning_msgtoshow}</p>
           </div>
         </div>
 
@@ -87,7 +91,7 @@ function Challengeotherpart({playerTurn,warning_msgtoshow,moveMadeFromtoTheDesti
           <p className="bg-violet-500 text-white text-xs font-semibold py-1 text-center">All moves</p>
             {
               Array.isArray(gameMatchMoves) && gameMatchMoves.length > 0 ?
-              <div className="flex flex-col gap-[1px] text-white">
+              <div className="flex flex-col text-white overflow-y-hidden scrollbar-hide max-h-[calc(97vh-5rem)]">
                 {
                   gameMatchMoves.map((data,idx) => (
                     <p key={idx}>

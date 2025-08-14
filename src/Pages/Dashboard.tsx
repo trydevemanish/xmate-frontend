@@ -4,7 +4,6 @@ import Creategame from "../components/Creategame"
 import LeaderBoard from "../components/LeaderBoard"
 import Welcometoxmate from '../components/Welcometoxmate'
 import CreateMatchwithcomputer from '../components/CreateMatchwithcomputer'
-import TotalGamePlayed from '../components/TotalGamePlayed'
 
 export default function Dashboard() {
   const [clickedMenu,setClickedMenu] = useState("")

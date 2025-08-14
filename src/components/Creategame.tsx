@@ -52,7 +52,11 @@ export default function Creategame() {
         })
 
         if(!res.ok){
-          console.error(await res.text())
+          const errText = await res.json()
+          console.error(errText?.message)
+          if(errText?.message == 'UnAuthorised user'){
+            navigate('/login')
+          }
           return;
         }
 
@@ -62,8 +66,6 @@ export default function Creategame() {
           console.log('Issue Occured while converting to json')
           return;
         }
-
-        console.log(data)
 
         if(data?.message != 'No game is pending'){
           set_pending_game_id(data?.data?.game_id)
@@ -98,7 +100,8 @@ export default function Creategame() {
       })
 
       if(!res.ok){
-        console.error(await res.text())
+        const errText = await res.json()
+        console.error(errText?.message)
         return;
       }
       
@@ -136,7 +139,8 @@ export default function Creategame() {
       })
 
       if(!res.ok){
-        console.error(await res.text())
+        const errText = await res.json()
+        console.error(errText?.message)
         return;
       }
 

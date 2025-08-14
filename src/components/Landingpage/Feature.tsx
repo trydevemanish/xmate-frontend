@@ -24,14 +24,14 @@ const features = [
 
 export default function Feature() {
   return (
-    <div className="py-12 px-28">
+    <div className="py-12 xs:px-20 md:px-28">
         <div className="flex flex-col gap-5 justify-center items-center pt-16">
             <p className="text-center border px-8 py-1 inline-block bg-violet-500 text-sm text-white rounded font-manrope shadow-xl animate-bounce shadow-violet-200 hover:bg-violet-400">Create your first game.</p>
             <p className="text-3xl font-bold py-8 font-cabinsketch flex gap-2">
                 <BiBrain className="size-8 text-violet-500" />
                 <span> Where <span className="text-violet-500">Strategy</span> Meets Fun – Play Chess Like Never Before!"</span>
             </p>
-            <div className="flex gap-4 py-2">
+            <div className="flex md:flex-row xs:flex-col xs:gap-12 md:gap-4 py-2">
                 {features.map((data,idx:number) => (
                     <FeatureCard key={idx} title={data?.title} icon={data?.icon} description={data?.description} />
                 ))}

@@ -35,7 +35,9 @@ export default function Register() {
             })
     
             if(!res.ok){
-                console.error(await res.text())
+                const errText = await res.json()
+                console.error(errText?.message)
+                return
             }
     
             const registerUserData = await res.json()

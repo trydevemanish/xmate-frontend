@@ -6,6 +6,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      screens:{
+        'xs':'300px'
+      },
       fontFamily: {
         manrope: ["Manrope", 'sans-serif'],
         yatraone: ["Yatra One", 'system-ui'],

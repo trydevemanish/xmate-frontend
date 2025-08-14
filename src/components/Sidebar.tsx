@@ -1,6 +1,7 @@
 import React,{useState} from 'react'
 import { Link } from 'react-router'
 import { BiUserCircle } from 'react-icons/bi'
+import { useAuth } from '../context/useContext'
 
 const Sidebarmenuoptions = [
   {
@@ -23,6 +24,8 @@ type Sidebarmenuoptiontype = {
 
 export default function Sidebar({setClickedMenu}:{setClickedMenu : React.Dispatch<React.SetStateAction<string>>}) {
   const [selectedoption,setSelectedOption] = useState(null)
+  const { logoutUser } = useAuth()
+  
 
   return (
       <div className='flex flex-col px-2 py-2 justify-between min-h-screen'>
@@ -52,7 +55,7 @@ export default function Sidebar({setClickedMenu}:{setClickedMenu : React.Dispatc
             <span>Profile</span>
           </p>
         </Link>
-         <p className='text-center bg-violet-500 text-white shadow-lg shadow-violet-300 rounded-md py-2 w-full text-xs cursor-pointer font-bold font-manrope'>logout</p>
+         <p className='text-center bg-violet-500 text-white shadow-lg shadow-violet-300 rounded-md py-2 w-full text-xs cursor-pointer font-bold font-manrope' onClick={logoutUser}>logout</p>
         </div>
       </div>
   )

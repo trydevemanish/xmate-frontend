@@ -2,26 +2,19 @@ import { useForm } from "react-hook-form"
 import { SigninFormValues } from "../../types/types"
 import { GiChessBishop } from "react-icons/gi"
 import { Link } from "react-router"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useAuth } from '../../context/useContext.tsx'
-import { useNavigate } from "react-router";
 
 export default function Login() {
     const { register , handleSubmit} = useForm<SigninFormValues>()
     const [loading,setloading] = useState(false)
-    const { isLoggedIn,loginUser } = useAuth()
-    const navigate = useNavigate()
-
-    useEffect(() => {
-        if(isLoggedIn){
-            navigate('/dashboard')
-        }
-    },[])
+    const { loginUser } = useAuth()
 
     const onSubmit = handleSubmit(async(data : SigninFormValues) => {
         try {
             setloading(true)
             loginUser(data)
+            
         } catch (error:any) {
             console.error(`Issue faced while user login: ${error.message}`)
             throw new Error(`Issue faced while user login: ${error.message}`)

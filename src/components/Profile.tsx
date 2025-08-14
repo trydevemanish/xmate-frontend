@@ -82,7 +82,12 @@ export default function Profile() {
         })
     
         if(!res.ok){
-          console.error(await res.text())
+          const errText = await res.json()
+          console.error(errText?.message)
+          if(errText?.message == 'UnAuthorised user'){
+            navigate('/login')
+          }
+          return;
         }
     
         const data = await res.json()
@@ -110,7 +115,8 @@ export default function Profile() {
         })
 
         if(!res.ok){
-          console.warn(await res.text())
+          const errText = await res.json()
+          console.error(errText?.message)
           return;
         }
 
@@ -164,8 +170,9 @@ export default function Profile() {
       })
 
       if(!res.ok){
-        console.error(await res.text())
-        return;
+        const errText = await res.json()
+        console.error(errText?.message)
+        return
       }
 
       const data = await res.json()

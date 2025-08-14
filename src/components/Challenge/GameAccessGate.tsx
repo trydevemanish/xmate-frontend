@@ -1,7 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router";
+import { GameMatchtype, UserDataType } from '../../types/types'
 
 type Props = {
+  userData: UserDataType | undefined,
+  gamematchdata:GameMatchtype | undefined,
   gamehasAlready_2Player: boolean;
   player_2_hasnotJoinedyet: boolean;
   checkIfGameIdValid: boolean;
@@ -12,6 +15,8 @@ type Props = {
 };
 
 export default function GameAccessGate({
+  userData,
+  gamematchdata,
   gamehasAlready_2Player,
   player_2_hasnotJoinedyet,
   checkIfGameIdValid,
@@ -20,7 +25,10 @@ export default function GameAccessGate({
   warningMessage,
   children,
 }: Props) {
+
   const anyCheckFailed =
+    !userData  || 
+    !gamematchdata ||
     gamehasAlready_2Player ||
     player_2_hasnotJoinedyet ||
     checkIfGameIdValid ||

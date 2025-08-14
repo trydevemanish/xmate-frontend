@@ -1,4 +1,3 @@
-import React from 'react'
 import faqtop1 from '../../assets/faqtop1.jpg'
 
 export default function Faqtop() {
@@ -13,7 +12,7 @@ export default function Faqtop() {
                     , Conquer -
                 </p>
                 <div className="flex flex-col gap-4 py-10">
-                    <p className="font-manrope leading-7">
+                    <p className="xs:text-center xs: py-4 font-manrope leading-7">
                         <span className="font-bold text-xl">xMate: </span> <br />
                         <span className="text-sm">The Ultimate Online Chess Challenge Platform, </span>
                         <span className="text-sm"> Challenge Your Peers, Master the Board – </span>

@@ -3,9 +3,6 @@ import Icon from '../../assets/chessicon.png'
 
 const menuitem = [
   {
-    name : 'About'
-  },
-  {
     name : 'Login'
   }
 ]
@@ -24,7 +21,7 @@ export default function Navbar() {
   }
 
   return (
-   <div className='px-16 py-2'>
+   <div className='xs:px-10 md:px-16 py-2'>
     <div className='flex justify-between item-center'>
       <div className='flex item-center gap-2'>
         <img src={Icon} alt="logo" className='size-6' />

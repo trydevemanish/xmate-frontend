@@ -4,7 +4,7 @@ import Icon from '../../assets/chessicon.png'
 export default function Footer() {
   return (
     <div className='pt-8 pb-2'>
-      <div className='flex px-36 justify-between'>
+      <div className='flex md:px-36 justify-between'>
         <section>
             <div className='flex items-center gap-4'>
               <img src={Icon} alt="logo" className='size-8' />
@@ -31,7 +31,7 @@ export default function Footer() {
         </section>
       </div>
       <div className='py-0 my-0'>
-        <p className='text-[12rem] font-bold text-right opacity-10'>xMate</p>
+        <p className='xs:text-[8rem] md:text-[12rem] w-full font-bold text-right opacity-10'>xMate</p>
       </div>
     </div>
   )

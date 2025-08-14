@@ -2,7 +2,6 @@ import React,{ createContext, useContext, useEffect, useState } from "react"
 import { useNavigate,useLocation } from "react-router";
 import { SigninFormValues } from '../types/types'
 import { toast } from "react-toastify";
-import {jwtDecode} from "jwt-decode";
 
 type defaultContextValue = {
     isLoggedIn:boolean;
@@ -55,7 +54,7 @@ const AuthProvider= ({children}:{children:React.ReactElement}) => {
                 }
             } 
         } else {
-            if(!pathname.startsWith('/u/profile') && !pathname.startsWith('/challenge')){
+            if(!pathname.startsWith('/u/profile') && !pathname.startsWith('/challenge') && !pathname.startsWith('/random')){
                 if(pathname == '/'){
                     navigate('/')
                 } else if (pathname == '/login') {
@@ -70,36 +69,44 @@ const AuthProvider= ({children}:{children:React.ReactElement}) => {
 
     const loginUser = async({email,password}:SigninFormValues) => {
 
-        const response = await fetch(`${ApiUrl}/u/login/`,{
-            method : "POST",
-            headers : {
-                'Content-Type': 'application/json',
-            },
-            body : JSON.stringify({
-                email : email,
-                password : password
+        try {
+            const response = await fetch(`${ApiUrl}/u/login/`,{
+                method : "POST",
+                headers : {
+                    'Content-Type': 'application/json',
+                },
+                body : JSON.stringify({
+                    email : email,
+                    password : password
+                })
             })
-        })
-
-        if(!response.ok){
-          throw new Error(await response.text())
-        } 
-
-        const data = await response.json()
-
-        console.log("Response",data)
-
-        if(data?.message == 'Login successfully'){
-            localStorage.setItem("Accesstoken",data?.access_token)
+    
+            if(!response.ok){
+                const errText = await response.json()
+                console.error(errText?.message)
+                return
+            } 
+    
+            const data = await response.json()
+    
+            console.log("Response",data)
+    
+            if(data?.message == 'Login successfully'){
+                localStorage.setItem("Accesstoken",data?.access_token)
+            }
+    
+            toast.success('login success')
+            setIsloggedIn(true)
+            navigate('/dashboard')
+        } catch (error) {
+            console.error(`Issue Occured while login: ${error}`)
         }
-
-        toast.success('login success')
-        setIsloggedIn(true)
-        navigate('/dashboard')
     }
 
     const logoutUser = async () => {
         try {
+            localStorage.setItem('Accesstoken','')
+
             const response = await fetch(`${ApiUrl}/u/logout/`,{
                 method : 'GET',
                 headers : {
@@ -108,7 +115,9 @@ const AuthProvider= ({children}:{children:React.ReactElement}) => {
             })
     
             if(!response.ok){
-                throw new Error(await response.text())
+                const errText = await response.json()
+                console.error(errText?.message)
+                return
             }
     
             toast.success('Logout success')
