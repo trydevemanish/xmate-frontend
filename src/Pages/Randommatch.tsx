@@ -2,10 +2,13 @@ import { Chess} from 'chess.js';
 import { useRef, useState } from 'react'
 import { Chessboard } from 'react-chessboard';
 import { Square } from 'react-chessboard/dist/chessboard/types';
+import { Link } from 'react-router';
 
 export default function Randommatch() {
     const chessGameRef = useRef(new Chess());
     const chessGame = chessGameRef.current;
+    const [matchover,setmatchOver] = useState(false)
+    const [msg,setMsg] = useState('')
 
     const [chessPosition, setChessPosition] = useState(chessGame.fen());
     const [moveFrom, setMoveFrom] = useState('');
@@ -14,15 +17,25 @@ export default function Randommatch() {
     function makeRandomMove() {
       const possibleMoves = chessGame.moves();
 
-      if (chessGame.isGameOver()) {
+      if (chessGame.isCheckmate()) {
+        setmatchOver(true);
+        setMsg('user win')
         return;
       }
+      
       const randomMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
       chessGame.move(randomMove);
       setChessPosition(chessGame.fen());
     }
 
     function getMoveOptions(square: Square) {
+
+      if(chessGame.isCheckmate()){
+        setmatchOver(true);
+        setMsg('computer win')
+        return;
+      }
+
       const moves = chessGame.moves({
         square,
         verbose: true
@@ -65,6 +78,7 @@ export default function Randommatch() {
         square: moveFrom as Square,
         verbose: true
       });
+
       const foundMove = moves.find(m => m.from === moveFrom && m.to === square);
 
       if (!foundMove) {
@@ -95,11 +109,41 @@ export default function Randommatch() {
     
     
   return (
-    <div>
-      <Chessboard id={'click-to-move'} arePiecesDraggable={false} customSquareStyles={optionSquares} onSquareClick={onSquareClick}  boardWidth={500} position={chessPosition}
-      customLightSquareStyle={{ backgroundColor: "#eeeed2" }}
-      customDarkSquareStyle={{ backgroundColor: "#769656" }}
-      />
+    <div className='bg-zinc-800 min-h-screen'>
+      <div className='flex flex-col w-full items-center justify-center min-h-screen relative'>
+          <div>
+            <Chessboard id={'click-to-move'} arePiecesDraggable={false} customSquareStyles={optionSquares} onSquareClick={onSquareClick}
+              boardWidth={600} position={chessPosition}
+              customLightSquareStyle={{ backgroundColor: "#eeeed2" }}
+              customDarkSquareStyle={{ backgroundColor: "#769656" }}
+            />
+          </div>
+
+          {
+            matchover && 
+            <div className='absolute flex flex-col items-center min-h-screen justify-center w-full bg-black/30'>
+                <div className='bg-zinc-700 rounded-sm shadow-xl px-8 py-6 font-manrope w-[480px] h-[240px] transform transition-all'>
+                    <div className='space-y-4'>
+                        <div className='text-center space-y-2'>
+                            <h2 className='text-lg font-manrope font-bold text-gray-800'>Game Ended!</h2>
+                            <p className='text-xl font-semibold text-emerald-600'>
+                              {msg} 🏆
+                            </p>
+                            <p className='text-white text-xs py-2'>Try Playing again !</p>
+                            <div className='bg-emerald-100 text-emerald-800 px-4 py-1  rounded-full text-xs inline-block'>
+                                Game Status: Completed
+                            </div>
+                            <div className='py-3'>
+                              <button className='text-xs text-emerald-100'>
+                                <Link to='/dashboard'>back to dashboard</Link>
+                              </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+      </div>
     </div>
   )
 }

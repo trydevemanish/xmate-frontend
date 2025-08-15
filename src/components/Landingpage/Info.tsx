@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import InfoImage from '../../assets/headerimg1.png'
 import smallImage from '../../assets/scroll7.avif'
 
@@ -12,8 +13,10 @@ export default function Info() {
                 <p className='font-yatraone text-white text-2xl'>Challenge Your Friends to a Game of Chess – Anytime, Anywhere!</p>
                 <p className='font-manrope font-semibold leading-6 text-xs'>Welcome to ChessMate , a fun and interactive online chess platform built for everyone – from coding enthusiasts and students to professional players! With ChessMate, you can challenge your friends or peers to thrilling chess matches, track your progress, and climb the leaderboard to prove your skills. </p>
                 <div className='flex items-end xs:py-8 md:py-0 justify-between'>
-                    <button className='bg-violet-600 text-white py-2 px-16 rounded shadow-md shadow-violet-300 hover:bg-violet-500 '>Create your first match.</button>
-                    <img src={smallImage} alt="secondImage" className='xs:invisible xs:hidden md:min-w-28 md:w-32 md:max-w-96 md:rounded-md md:shadow-md md:shadow-violet-300' />
+                    <button className='bg-violet-600 text-white py-2 px-16 rounded shadow-md shadow-violet-300 hover:bg-violet-500 '>
+                        <Link to='/dashboard'>Create your first match.</Link>
+                    </button>
+                    <img src={smallImage} alt="secondImage" className='xs:invisible xs:hidden md:block md:visible md:min-w-28 md:w-32 md:max-w-96 md:rounded-md md:shadow-md md:shadow-violet-300' />
                 </div>
             </div>
         </div>

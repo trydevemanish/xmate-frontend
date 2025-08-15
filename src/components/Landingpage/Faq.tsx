@@ -2,24 +2,24 @@ import FaqCard from "../FaqCard"
 
 const faqcardText = [
   {
-    label1:'how does the leader board work?',
-    label2:'leader board work how much matche syour have playes.'
+    label1:'How does the leader board work ?',
+    label2:'leader board shows the top players who have scored most points.'
   },
   {
-    label1:'hi',
-    label2:'hey'
+    label1:'How many matches you can i create ?',
+    label2:'You need to complete your previous match to create a new match or delete it.'
   },
   {
-    label1:'ok1',
-    label2:'this is ok1'
+    label1:'Will my data be lost if i leave the match ?',
+    label2:'Nope your data are stored in the db.'
   },
   {
-    label1:'ok3',
-    label2:'this is ok2'
+    label1:'Is there a time limit for a match to be completed ?',
+    label2:'Not till now..'
   },
   {
-    label1:'ok5',
-    label2:'this is ok3'
+    label1:'Can i see the moves i am making in the match ?',
+    label2:'yes.'
   }
 ]
 

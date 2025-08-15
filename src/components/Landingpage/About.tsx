@@ -6,7 +6,7 @@ export default function About() {
   return (
     <div className="xs:px-20 md:px-28 py-2">
       <div className='flex xs:flex-col xs:items-center md:flex-row md:justify-between xs:px-4 md:px-12 py-1 gap-10'>
-        <img src={AboutImage} alt="aboutimg" className='w-[21rem] max-w-[30rem] h-[20rem] max-h-[30rem] rounded-md shadow-xl shadow-violet-200'/>
+        <img src={AboutImage} alt="aboutimg" className='w-[21rem] max-w-[30rem] h-[20rem] max-h-[30rem] rounded-md shadow-xl shadow-violet-200 transition-transform duration-300 hover:scale-105 hover:-translate-y-4'/>
         <div>
             <p className='text-3xl flex flex-col gap-2 pt-6'>
               <span className='font-yatraone'>Where Strategy Meets <span className='text-violet-500'>Fun</span> </span>

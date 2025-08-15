@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import faqtop1 from '../../assets/faqtop1.jpg'
 
 export default function Faqtop() {
@@ -19,7 +20,9 @@ export default function Faqtop() {
                         <span className="font-yatraone text-lg">xMate Awaits!</span>
                     </p>
                     <div className='flex flex-row items-center justify-center py-4'>
-                        <button className='px-8 text-sm py-1 bg-violet-600  w-fit text-white rounded  hover:bg-violet-500'>Create Your First Match</button>
+                        <button className='px-8 text-sm py-1 bg-violet-600  w-fit text-white rounded  hover:bg-violet-500'>
+                            <Link to='/dashboard'>Create Your First Match.</Link>
+                        </button>
                     </div>
                 </div>
             </div>

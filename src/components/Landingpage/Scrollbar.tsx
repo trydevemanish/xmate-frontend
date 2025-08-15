@@ -10,31 +10,31 @@ import Scroll7 from '../../assets/scroll7.avif'
 const Scroll = [
     {
         image : Scroll1,
-        text : 'ok1'
+        text : 'Challenge'
     },
     {
         image : Scroll2,
-        text : 'ok2'
+        text : 'your'
     },
     {
         image : Scroll3,
-        text : 'ok3'
+        text : 'peers'
     },
     {
         image : Scroll4,
-        text : 'ok4'
+        text : 'for'
     },
     {
         image : Scroll5,
-        text : 'ok5'
+        text : 'a'
     },
     {
         image : Scroll6,
-        text : 'ok6'
+        text : 'dual'
     },
     {
         image : Scroll7,
-        text : 'ok7'
+        text : 'match.'
     }
 ]
 
@@ -47,8 +47,10 @@ export default function Scrollbar() {
       </p>
       <div className="flex scrollbar-hide overflow-x-auto py-10 gap-[2px]">
         {Scroll.map((data,idx:number) => (
-            <div key={idx} className="flex flex-col gap-2">
-                <img src={data?.image} alt="scroll1" className="min-w-40 w-60 max-w-[25rem] min-h-48 h-auto max-h-[24rem] hover:-translate-y-2 hover:transform hover:duration-300 hover:contrast-125 brightness-75 hover:shadow-md hover:shadow-violet-300 rounded-b" />
+            <div key={idx} className="flex flex-col gap-[1px]">
+                <img src={data?.image} alt="scroll1" className="min-w-40 w-60 max-w-[25rem] min-h-48 h-auto max-h-[24rem]
+                 hover:-translate-y-2 hover:scale-105 transition-transform duration-200 
+                  brightness-75 hover:shadow-md hover:shadow-violet-300 rounded-b" />
                 <p className="text-xs font-manrope text-center">{data?.text}</p>
             </div>
         ))}

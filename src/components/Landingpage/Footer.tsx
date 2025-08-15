@@ -1,5 +1,6 @@
 import { MdEmail } from 'react-icons/md'
 import Icon from '../../assets/chessicon.png'
+import { Link } from 'react-router'
 
 export default function Footer() {
   return (
@@ -14,14 +15,17 @@ export default function Footer() {
               </div>
             </div>
             <div className='py-8'>
-              <p className='bg-violet-600 px-10 py-1 rounded text-white inline-block shadow-lg cursor-pointer shadow-violet-300 '>Get started !</p>
+              <p className='bg-violet-600 px-10 py-1 rounded text-white inline-block shadow-lg cursor-pointer shadow-violet-300 '>
+                <Link to={'/dashboard'}>Get started !</Link>
+              </p>
               <p className='text-xs pt-4'>Created by -me (Manish ✍).</p>
             </div>
         </section>
         <section>
           <div className='flex flex-col text-xs font-bold font-manrope gap-4 pt-4'>
-            <p className='hover:underline hover:underline-offset-2'>About</p>
-            <p className='hover:underline hover:underline-offset-2'>leaderboard</p>
+            <p className='hover:underline hover:underline-offset-2'>
+              <Link to={'/dashboard'}>leaderboard !</Link>
+            </p>
             <p className='hover:underline hover:underline-offset-2'>Features</p>
             <p className='flex gap-2 items-center'>
               <MdEmail className='size-6 text-violet-600' />
