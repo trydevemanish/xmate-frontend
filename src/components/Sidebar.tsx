@@ -37,13 +37,13 @@ export default function Sidebar({setClickedMenu,closeSidebar}:props) {
       <div className='flex flex-col px-2 py-2 justify-between min-h-screen'>
         <div className='flex flex-col gap-1 font-manrope text-sm'>
           <div className='px-2 flex flex-row items-center justify-between text-xs text-start py-1 md:invisible md:hidden'>
-            <p className='text-violet-400'>xmate!</p>
-            <CgCloseR className='size-4 rounded-sm cursor-pointer stroke-black' onClick={closeSidebar} />
+            <p className='xs:text-base md:text-xs text-violet-400'>xmate!</p>
+            <CgCloseR className='size-5 rounded-sm cursor-pointer stroke-black' onClick={closeSidebar} />
           </div>
           {Sidebarmenuoptions.map((data:Sidebarmenuoptiontype,idx:any) => (
             <p 
               key={idx} 
-              className={` text-xs text-start px-2 cursor-pointer py-1 rounded hover:bg-violet-400 hover:text-white
+              className={` xs:text-base md:text-xs text-start px-2 cursor-pointer py-1 rounded hover:bg-violet-400 hover:text-white
                  ${
                     selectedoption === idx ? 'bg-violet-200' : ''
                  }

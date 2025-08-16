@@ -41,7 +41,7 @@ const Scroll = [
 export default function Scrollbar() {
   return (
     <div className="py-4">
-      <p className="text-xl font-yatraone flex gap-2 items-end px-16">
+      <p className="text-xl font-yatraone flex gap-2 items-end xs:px-6 md:px-16">
         <span>- Play Smart. Win Big</span>
         <span><FaChessKing className="text-violet-500 size-10 pb-2" /></span>
       </p>
@@ -51,7 +51,7 @@ export default function Scrollbar() {
                 <img src={data?.image} alt="scroll1" className="min-w-40 w-60 max-w-[25rem] min-h-48 h-auto max-h-[24rem]
                  hover:-translate-y-2 hover:scale-105 transition-transform duration-200 
                   brightness-75 hover:shadow-md hover:shadow-violet-300 rounded-b" />
-                <p className="text-xs font-manrope text-center">{data?.text}</p>
+                <p className="md:text-xs xs:text-base font-manrope text-center">{data?.text}</p>
             </div>
         ))}
       </div>

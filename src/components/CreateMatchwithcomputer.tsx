@@ -44,7 +44,7 @@ export default function CreateMatchwithcomputer({setShowSidebar}:props) {
     <BiSidebar className='size-7 py-1 xs:visible xs:block md:hidden md:invisible' onClick={() => setShowSidebar(prev => !prev)} />
         <div className='mt-5'>
             <div className='flex items-center justify-center gap-1'>
-                <p className='text-center text-base font-manrope font-semibold'>Create a match with computer</p>
+                <p className='text-center xs:text-xl md:text-base font-manrope font-semibold'>Create a match with computer</p>
                 <FaComputer className='size-4 text-violet-500' />
             </div>
             <div className='flex flex-col items-center justify-center mt-10 font-manrope min-h-[calc(97vh-10rem)]'>
@@ -62,7 +62,7 @@ export default function CreateMatchwithcomputer({setShowSidebar}:props) {
                     ))}
                 </div>
                 <div className='mt-5'>
-                    <p className="bg-violet-500 px-10 py-2 text-xs rounded shadow-lg shadow-violet-200 text-white font-semibold font-manrope cursor-pointer" onClick={handleCreateMatch}>
+                    <p className="bg-violet-500 px-10 py-2 xs:text-base md:text-xs rounded shadow-lg shadow-violet-200 text-white font-semibold font-manrope cursor-pointer" onClick={handleCreateMatch}>
                     {!loading ? <span>Start the game!</span> : <span className='flex justify-center gap-3 items-center'>
                         <CgSpinner className='size-4 animate-spin' />
                         <span>Starting</span>

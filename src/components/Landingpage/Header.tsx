@@ -5,18 +5,18 @@ import { Link } from "react-router"
 
 export default function Header() {
   return (
-    <div className="py-4 px-16 bg-gradient-to-b from-white via-violet-200 to-white">
-        <p className="md:text-5xl xs:text-4xl font-yatraone text-center pt-16">
-            Challenge, 
+    <div className="py-4 xs:px-6 md:px-16 bg-gradient-to-b from-white via-violet-200 to-white">
+        <p className="md:text-5xl xs:text-3xl text-wrap items-center font-yatraone text-center pt-16">
+            <span>Challenge,</span> 
             <span className="text-violet-500">Compete</span>
-            , Conquer -
+            <span>, Conquer -</span>
         </p>
-        <p className="font-cabinsketch py-3 text-3xl flex flex-row gap-1 xs:text-center xs:justify-center md:pl-[35rem] items-center"> 
+        <p className="font-cabinsketch py-3 xs:text-lg md:text-3xl flex flex-row gap-1 xs:text-center xs:justify-center md:pl-[35rem] items-center"> 
             <span>Play Chess with </span>
             <span className="text-violet-500 font-bold"> Friends !</span>
-            <span><FaChessRook className="size-4" /></span>
+            <span className='md:visible md:block xs:hidden xs:invisible'><FaChessRook className="size-4" /></span>
         </p>
-        <div className="xs:flex xs:flex-col xs:items-center xs:gap-8 md:grid md:grid-cols-3 md:items-start  md:justify-center py-16 md:gap-2 xs:px-10 md:px-24">
+        <div className="xs:flex xs:flex-col xs:items-center xs:gap-8 md:grid md:grid-cols-3 md:items-start  md:justify-center py-16 md:gap-2 xs:px-6 md:px-24">
             <div className="col-start-1 col-end-2">
                 <div className="flex flex-col gap-4">
                     <p className="font-manrope leading-7">
@@ -36,7 +36,9 @@ export default function Header() {
             </div>
             <div className="md:col-start-3 md:col-end-4">
                 <p className="text-xs font-bold font-manrope py-1"> – Who’s the Ultimate Chess Champion?</p>
-                <img src={HeaderImg2} alt="headerImage2" className="object-cover w-full min-w-80 max-w-[30rem] min-h-72 h-auto max-h-[20rem] brightness-80 rounded shadow-lg shadow-violet-100" />
+                <img src={HeaderImg2} alt="headerImage2" className="object-fill overflow-hidden 
+                md:w-full md:min-w-80 md:max-w-[23rem] md:min-h-72 md:h-auto md:max-h-[20rem]
+                brightness-80 rounded shadow-lg shadow-violet-100" />
             </div>
         </div>
     </div>
