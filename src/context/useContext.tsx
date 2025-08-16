@@ -83,13 +83,15 @@ const AuthProvider= ({children}:{children:React.ReactElement}) => {
     
             if(!response.ok){
                 const errText = await response.json()
-                console.error(errText?.message)
+                if(errText.message == 'Failed to login User: User matching query does not exist.'){
+                    toast.warning('Email Not vaild')
+                    return
+                }
+                toast.warning(errText.message)
                 return
             } 
     
             const data = await response.json()
-    
-            console.log("Response",data)
     
             if(data?.message == 'Login successfully'){
                 localStorage.setItem("Accesstoken",data?.access_token)
@@ -98,17 +100,20 @@ const AuthProvider= ({children}:{children:React.ReactElement}) => {
             toast.success('login success')
             setIsloggedIn(true)
             navigate('/dashboard')
+
         } catch (error) {
             console.error(`Issue Occured while login: ${error}`)
+            return;
         }
     }
 
     const logoutUser = async () => {
         try {
+
             localStorage.setItem('Accesstoken','')
 
             const response = await fetch(`${ApiUrl}/u/logout/`,{
-                method : 'GET',
+                method : 'POST',
                 headers : {
                     Authorization : `Bearer ${token}`
                 }
@@ -117,6 +122,7 @@ const AuthProvider= ({children}:{children:React.ReactElement}) => {
             if(!response.ok){
                 const errText = await response.json()
                 console.error(errText?.message)
+                toast.warning(errText.message)
                 return
             }
     
@@ -126,6 +132,7 @@ const AuthProvider= ({children}:{children:React.ReactElement}) => {
 
         } catch (error) {
             console.error(`Issue Faced while logging out: ${error}`)
+            return
         }
     }
 

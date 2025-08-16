@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { BiUserCircle } from 'react-icons/bi'
 import { useAuth } from '../context/useContext'
 import { CgCloseR } from 'react-icons/cg'
+import { useNavigate } from 'react-router'
 
 const Sidebarmenuoptions = [
   {
@@ -30,8 +31,24 @@ type props = {
 
 export default function Sidebar({setClickedMenu,closeSidebar}:props) {
   const [selectedoption,setSelectedOption] = useState(null)
+  const [loading,setLoading] = useState(false)
   const { logoutUser } = useAuth()
+  const navigate = useNavigate()
   
+  async function handleLogout(){
+    try {
+      setLoading(true)
+      await logoutUser()
+      setTimeout(() => {
+          setLoading(false);
+          navigate('/login');
+      }, 500);
+    } catch (error) {
+      console.error(`Logout Issue: ${error}`)
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
       <div className='flex flex-col px-2 py-2 justify-between min-h-screen'>
@@ -65,7 +82,14 @@ export default function Sidebar({setClickedMenu,closeSidebar}:props) {
             <span>Profile</span>
           </p>
         </Link>
-         <p className='text-center bg-violet-500 text-white shadow-lg shadow-violet-300 rounded-md py-2 w-full text-xs cursor-pointer font-bold font-manrope' onClick={logoutUser}>logout</p>
+        <p className={`text-center ${loading ? 'bg-violet-400 opacity-70' : 'bg-violet-500 opacity-100'} text-white shadow-lg shadow-violet-300 rounded-md py-2 w-full text-xs cursor-pointer font-bold font-manrope`} onClick={handleLogout}>
+          {
+            loading ? 
+            'wait bhai..'
+            :
+            'logout'
+          }
+        </p>
         </div>
       </div>
   )

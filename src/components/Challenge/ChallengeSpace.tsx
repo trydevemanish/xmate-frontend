@@ -65,6 +65,7 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
 
         socketInstance.onopen = () => {
             console.log('Socket Connected')
+            toast.success('conn established')
         }
 
         socketInstance.onmessage = (event) => {
@@ -134,6 +135,7 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
 
         socketInstance.onclose = () => {
             console.log('socket disconnected')
+            toast.warning('conn disconnected, refersh the page again to connect')
         }
 
         setSocket(socketInstance)

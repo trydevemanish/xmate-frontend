@@ -60,7 +60,7 @@ export default function LeaderBoard({setShowSidebar}:props) {
                 }
                 
                 const data = await res.json()
-                console.log('Data',data)
+                console.log('Data',data?.message)
 
                 setAllUserRankData(data?.data)
                 

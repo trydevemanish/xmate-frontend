@@ -91,7 +91,7 @@ export default function Profile() {
         }
     
         const data = await res.json()
-        console.log(data)
+        console.log(data?.message)
         setUserData(data?.data)
       } catch (error) {
         console.error(`Issue Occured getting user data: ${error}`)
@@ -126,7 +126,7 @@ export default function Profile() {
           return;
         }
 
-        console.log('recent game data',data)
+        console.log('recent game data',data?.message)
         setRecentGameOftheUser(data?.data)
       
     } catch (error) {
@@ -219,7 +219,7 @@ export default function Profile() {
           (
             <div>
               <div className='pt-[53px] md:grid md:grid-cols-2'>
-                <div className='md:col-start-1 py-3 xs:px-6 md:px-6 col-end-2 flex flex-col gap-2 text-sm font-manrope font-semibold'>
+                <div className='md:col-start-1 py-3 xs:px-6 md:px-6 col-end-2 flex flex-col gap-2 xs:text-base md:text-sm font-manrope font-semibold'>
                   <p>Name: {userData.username}</p>
                   <p className='text-xs opacity-55 flex gap-1 items-center'>
                     <span><CgMail className='size-3' /></span>
