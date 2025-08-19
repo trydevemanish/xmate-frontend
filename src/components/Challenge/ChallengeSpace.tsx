@@ -62,8 +62,7 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
         hasConnectedRef.current = true;
         
         let ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
-        let ws_path = `${ws_scheme}://${window.location.host}/ws/game/${gameid}/?user=${userData.username}&user_id=${userData.id}`;
-        // `ws://127.0.0.1:8000/ws/game/${gameid}/?user=${userData.username}&user_id=${userData.id}`
+        let ws_path = window.location.protocol === "https:" ? `${ws_scheme}://xmate-backend.onrender.com/ws/game/${gameid}/?user=${userData.username}&user_id=${userData.id}` : `ws://127.0.0.1:8000/ws/game/${gameid}/?user=${userData.username}&user_id=${userData.id}` ;
 
         const socketInstance = new WebSocket(ws_path)
 
