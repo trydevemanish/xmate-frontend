@@ -47,6 +47,8 @@ const AuthProvider= ({children}:{children:React.ReactElement}) => {
             if(!pathname.startsWith('/challenge')){
                 if(pathname == '/'){
                     navigate('/')
+                } else if (pathname == '/u/practice'){
+                    navigate('/u/practice')
                 } else if (pathname == '/register'){
                     navigate('/register')
                 } else {

@@ -8,6 +8,7 @@ import Profile from './components/Profile'
 import Challenge from './Pages/Challenge'
 import { ToastContainer } from 'react-toastify';
 import Randommatch from './Pages/Randommatch'
+import Practice from './Pages/Practice'
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
       <Route path='/u/profile' element={<Profile />} />
       <Route path='/challenge/u/:gameid' element={<Challenge />} />
       <Route path='/random/match' element={<Randommatch />} />
+      <Route path='/u/practice' element={<Practice />} />
       </Routes>
     <ToastContainer />
    </main>
