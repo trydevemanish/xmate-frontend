@@ -54,17 +54,19 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
 
     useEffect(() => {
 
-        if(!gameid || !userData || !gamematchdata || hasConnectedRef.current){
+        if(!gameid || !userData || !gamematchdata){
             console.log('Both Value are undefined')
             return
         }
+
+        if(hasConnectedRef.current) return 
 
         hasConnectedRef.current = true;
         
         let ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
         let ws_path = window.location.protocol === "https:" ? `${ws_scheme}://xmate-backend.onrender.com/ws/game/${gameid}/?user=${userData.username}&user_id=${userData.id}` : `ws://127.0.0.1:8000/ws/game/${gameid}/?user=${userData.username}&user_id=${userData.id}` ;
 
-        const socketInstance = new WebSocket(ws_path)
+        let socketInstance = new WebSocket(ws_path)
 
         socketInstance.onopen = () => {
             console.log('Socket Connected')
@@ -133,18 +135,23 @@ export default function ChallengeSpace({gameid,userData,gamematchdata}:props) {
         }
 
         socketInstance.onerror = (error) => {
-            console.error('WebSocket error:', error);
+            // console.error('WebSocket error:', error);
+             console.log('WebSocket error:', {
+                code: event.code,
+                reason: event.reason,
+                wasClean: event.wasClean
+            });
         };
 
         socketInstance.onclose = () => {
             console.log('socket disconnected')
-            toast.warning('conn disconnected, refersh the page again to connect')
+            toast.warning('conn disconnected, retrying the connection!')
         }
 
         setSocket(socketInstance)
 
         return () => {
-            if (socketInstance.readyState === WebSocket.OPEN) {
+            if (socketInstance && socketInstance.readyState === WebSocket.OPEN) {
                 socketInstance.close();
             }
         }
